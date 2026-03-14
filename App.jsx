@@ -32,6 +32,13 @@ const USERS = {
   morgan: { id: 'morgan', name: "Morgan", color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/30", glow: "shadow-pink-500/20" },
 };
 
+// --- LOGIC: BREATHING CONSTANTS ---
+const BREATH_SEQUENCE = [
+  { phase: "inhale", duration: 4, scale: "scale-150" },
+  { phase: "hold", duration: 4, scale: "scale-150" },
+  { phase: "exhale", duration: 6, scale: "scale-90" },
+];
+
 // --- MAIN APPLICATION ---
 export default function App() {
   const [screen, setScreen] = useState("home"); // home | session | complete | admin
@@ -55,12 +62,6 @@ export default function App() {
   const intervalRef = useRef(null);
 
   // --- LOGIC: BREATHING ---
-  const breathSequence = [
-    { phase: "inhale", duration: 4, scale: "scale-150" },
-    { phase: "hold", duration: 4, scale: "scale-150" },
-    { phase: "exhale", duration: 6, scale: "scale-90" },
-  ];
-
   const startBreathing = () => {
     setBreathCount(0);
     runBreathCycle(0, 0);
@@ -72,7 +73,7 @@ export default function App() {
       setAffirmation(AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)]);
       return;
     }
-    const step = breathSequence[stepIndex];
+    const step = BREATH_SEQUENCE[stepIndex];
     setBreathPhase(step.phase);
     setBreathTimer(step.duration);
 
@@ -84,7 +85,7 @@ export default function App() {
       if (elapsed >= step.duration) {
         clearInterval(intervalRef.current);
         const nextStep = stepIndex + 1;
-        if (nextStep >= breathSequence.length) {
+        if (nextStep >= BREATH_SEQUENCE.length) {
           setBreathCount(cycleIndex + 1);
           runBreathCycle(cycleIndex + 1, 0);
         } else {

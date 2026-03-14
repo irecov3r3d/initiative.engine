@@ -147,6 +147,7 @@ export default function App() {
           return (
             <button
               key={u.id}
+              disabled={isDone}
               onClick={() => {
                 if(!isDone) {
                   setActiveUser(u.id);
@@ -155,7 +156,7 @@ export default function App() {
                   setScreen("session");
                 }
               }}
-              className={`w-full relative overflow-hidden rounded-2xl p-6 flex items-center justify-between transition-all duration-300 border backdrop-blur-md
+              className={`w-full relative overflow-hidden rounded-2xl p-6 flex items-center justify-between transition-all duration-300 border backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
                 ${isDone
                   ? `bg-slate-800/40 ${u.border} opacity-80 cursor-default`
                   : `bg-slate-800/60 border-slate-700 hover:bg-slate-800 hover:border-slate-600 shadow-lg`}`}
@@ -276,8 +277,8 @@ export default function App() {
               <button
                 onClick={completeSession}
                 disabled={!moodWord.trim()}
-                className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all
-                  ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600'}`}
+                className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
+                  ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600 cursor-not-allowed'}`}
               >
                 Complete
               </button>

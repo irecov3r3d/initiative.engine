@@ -147,17 +147,17 @@ export default function App() {
           return (
             <button
               key={u.id}
+              disabled={isDone}
+              aria-label={isDone ? `${u.name} session completed` : `Start session for ${u.name}`}
               onClick={() => {
-                if(!isDone) {
-                  setActiveUser(u.id);
-                  setBreathPhase("ready");
-                  setMoodWord("");
-                  setScreen("session");
-                }
+                setActiveUser(u.id);
+                setBreathPhase("ready");
+                setMoodWord("");
+                setScreen("session");
               }}
-              className={`w-full relative overflow-hidden rounded-2xl p-6 flex items-center justify-between transition-all duration-300 border backdrop-blur-md
+              className={`w-full relative overflow-hidden rounded-2xl p-6 flex items-center justify-between transition-all duration-300 border backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950
                 ${isDone
-                  ? `bg-slate-800/40 ${u.border} opacity-80 cursor-default`
+                  ? `bg-slate-800/40 ${u.border} opacity-80 cursor-not-allowed`
                   : `bg-slate-800/60 border-slate-700 hover:bg-slate-800 hover:border-slate-600 shadow-lg`}`}
             >
               <div className="flex items-center gap-4 relative z-10">

@@ -32,6 +32,20 @@ const USERS = {
   morgan: { id: 'morgan', name: "Morgan", color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/30", glow: "shadow-pink-500/20" },
 };
 
+const BREATH_SEQUENCE = [
+  { phase: "inhale", duration: 4, scale: "scale-150" },
+  { phase: "hold", duration: 4, scale: "scale-150" },
+  { phase: "exhale", duration: 6, scale: "scale-90" },
+];
+
+const BackgroundGradients = React.memo(() => (
+  <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
+    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen" />
+    <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] mix-blend-screen" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-800/30 rounded-full blur-[100px] mix-blend-screen" />
+  </div>
+));
+
 // --- MAIN APPLICATION ---
 export default function App() {
   const [screen, setScreen] = useState("home"); // home | session | complete | admin
@@ -55,12 +69,6 @@ export default function App() {
   const intervalRef = useRef(null);
 
   // --- LOGIC: BREATHING ---
-  const breathSequence = [
-    { phase: "inhale", duration: 4, scale: "scale-150" },
-    { phase: "hold", duration: 4, scale: "scale-150" },
-    { phase: "exhale", duration: 6, scale: "scale-90" },
-  ];
-
   const startBreathing = () => {
     setBreathCount(0);
     runBreathCycle(0, 0);
@@ -72,7 +80,7 @@ export default function App() {
       setAffirmation(AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)]);
       return;
     }
-    const step = breathSequence[stepIndex];
+    const step = BREATH_SEQUENCE[stepIndex];
     setBreathPhase(step.phase);
     setBreathTimer(step.duration);
 
@@ -84,7 +92,7 @@ export default function App() {
       if (elapsed >= step.duration) {
         clearInterval(intervalRef.current);
         const nextStep = stepIndex + 1;
-        if (nextStep >= breathSequence.length) {
+        if (nextStep >= BREATH_SEQUENCE.length) {
           setBreathCount(cycleIndex + 1);
           runBreathCycle(cycleIndex + 1, 0);
         } else {
@@ -403,12 +411,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-slate-700 relative overflow-hidden flex items-center justify-center p-4">
-      {/* Background Gradients */}
-      <div className="fixed inset-0 z-0 opacity-40">
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] mix-blend-screen" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-800/30 rounded-full blur-[100px] mix-blend-screen" />
-      </div>
+      <BackgroundGradients />
 
       {/* Content Container */}
       <div className="relative z-10 w-full">

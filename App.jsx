@@ -360,7 +360,8 @@ export default function App() {
         </div>
         <h2 className="text-center text-xs tracking-[0.3em] text-slate-400 uppercase mb-8">System Override</h2>
 
-        {adminPass !== "build2025" ? (
+        {/* Security: Use environment variable instead of hardcoded secret for admin override */}
+        {adminPass !== import.meta.env.VITE_ADMIN_PASS ? (
           <div className="space-y-4">
             <input
               type="password"

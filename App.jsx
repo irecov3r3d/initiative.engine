@@ -106,7 +106,8 @@ export default function App() {
 
   // --- LOGIC: COMPLETION ---
   const completeSession = () => {
-    if (!activeUser || !moodWord.trim()) return;
+    // Security: Validate activeUser exists in USERS to prevent potential state corruption
+    if (!activeUser || !USERS[activeUser] || !moodWord.trim()) return;
 
     const newSessionDone = { ...sessionDone, [activeUser]: true };
     setSessionDone(newSessionDone);
@@ -376,6 +377,8 @@ export default function App() {
               placeholder="Authorization Code"
               aria-label="Authorization Code"
               value={adminPass}
+              /* Security: Limit input length to prevent potential DoS from extremely long strings */
+              maxLength={64}
               onChange={e => setAdminPass(e.target.value)}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />

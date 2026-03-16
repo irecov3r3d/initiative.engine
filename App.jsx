@@ -32,6 +32,8 @@ const USERS = {
   morgan: { id: 'morgan', name: "Morgan", color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/30", glow: "shadow-pink-500/20" },
 };
 
+const USER_LIST = Object.values(USERS);
+
 const BREATH_SEQUENCE = [
   { phase: "inhale", duration: 4, scale: "scale-150" },
   { phase: "hold", duration: 4, scale: "scale-150" },
@@ -40,9 +42,9 @@ const BREATH_SEQUENCE = [
 
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
-    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen" />
-    <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] mix-blend-screen" />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-800/30 rounded-full blur-[100px] mix-blend-screen" />
+    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
+    <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] mix-blend-screen transform-gpu will-change-transform" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-800/30 rounded-full blur-[100px] mix-blend-screen transform-gpu will-change-transform" />
   </div>
 ));
 
@@ -150,7 +152,7 @@ export default function App() {
 
       {/* User Cards */}
       <div className="space-y-4 mt-8">
-        {Object.values(USERS).map(u => {
+        {USER_LIST.map(u => {
           const isDone = sessionDone[u.id];
           return (
             <button
@@ -218,7 +220,7 @@ export default function App() {
             <div className="relative w-48 h-48 flex items-center justify-center">
               {/* Animated Breathing Circle */}
               <div
-                className={`absolute inset-0 rounded-full border border-white/10 transition-transform bg-gradient-to-tr from-white/5 to-transparent
+                className={`absolute inset-0 rounded-full border border-white/10 transition-transform bg-gradient-to-tr from-white/5 to-transparent transform-gpu
                   ${breathPhase === 'inhale' ? 'scale-150 duration-[4000ms] ease-out' : ''}
                   ${breathPhase === 'hold' ? 'scale-150 duration-700 ease-in-out' : ''}
                   ${breathPhase === 'exhale' ? 'scale-90 duration-[6000ms] ease-in-out' : ''}

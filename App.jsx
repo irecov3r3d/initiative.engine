@@ -239,14 +239,25 @@ export default function App() {
               </div>
             </div>
 
-            <button
-              onClick={startBreathing}
-              disabled={breathPhase !== "ready"}
-              className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all
-                ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 cursor-not-allowed'}`}
-            >
-              {breathPhase === "ready" ? "Begin" : "Focus"}
-            </button>
+            <div className="flex flex-col items-center gap-4 w-full">
+              <button
+                onClick={startBreathing}
+                disabled={breathPhase !== "ready"}
+                className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950
+                  ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 cursor-not-allowed'}`}
+              >
+                {breathPhase === "ready" ? "Begin" : "Focus"}
+              </button>
+
+              {breathPhase === "ready" && (
+                <button
+                  onClick={() => setScreen("home")}
+                  className="w-full max-w-[200px] py-2 text-xs tracking-widest uppercase text-slate-500 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-md"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="w-full space-y-6 animate-in fade-in duration-700">

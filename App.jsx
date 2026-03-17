@@ -46,6 +46,20 @@ const BackgroundGradients = React.memo(() => (
   </div>
 ));
 
+// ⚡ Bolt: Memoized to isolate complex CSS filter/transition re-renders from the high-frequency 1-second interval timer updates in the parent component.
+const AnimatedBreathingCircle = React.memo(({ breathPhase, color }) => (
+  <div
+    className={`absolute inset-0 rounded-full border border-white/10 transition-transform bg-gradient-to-tr from-white/5 to-transparent
+      ${breathPhase === 'inhale' ? 'scale-150 duration-[4000ms] ease-out' : ''}
+      ${breathPhase === 'hold' ? 'scale-150 duration-700 ease-in-out' : ''}
+      ${breathPhase === 'exhale' ? 'scale-90 duration-[6000ms] ease-in-out' : ''}
+      ${breathPhase === 'ready' ? 'scale-100' : ''}
+    `}
+    style={{ boxShadow: breathPhase !== 'ready' ? `0 0 40px var(--tw-shadow-color)` : 'none' }}
+    shadow-color={color}
+  />
+));
+
 // --- MAIN APPLICATION ---
 export default function App() {
   const [screen, setScreen] = useState("home"); // home | session | complete | admin
@@ -217,16 +231,7 @@ export default function App() {
 
             <div className="relative w-48 h-48 flex items-center justify-center">
               {/* Animated Breathing Circle */}
-              <div
-                className={`absolute inset-0 rounded-full border border-white/10 transition-transform bg-gradient-to-tr from-white/5 to-transparent
-                  ${breathPhase === 'inhale' ? 'scale-150 duration-[4000ms] ease-out' : ''}
-                  ${breathPhase === 'hold' ? 'scale-150 duration-700 ease-in-out' : ''}
-                  ${breathPhase === 'exhale' ? 'scale-90 duration-[6000ms] ease-in-out' : ''}
-                  ${breathPhase === 'ready' ? 'scale-100' : ''}
-                `}
-                style={{ boxShadow: breathPhase !== 'ready' ? `0 0 40px var(--tw-shadow-color)` : 'none' }}
-                shadow-color={u.color}
-              />
+              <AnimatedBreathingCircle breathPhase={breathPhase} color={u.color} />
 
               <div className="relative z-10 flex flex-col items-center">
                 <Wind className={`w-8 h-8 mb-2 ${u.color}`} />

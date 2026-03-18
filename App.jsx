@@ -40,6 +40,25 @@ const BREATH_SEQUENCE = [
   { phase: "exhale", duration: 6, scale: "scale-90" },
 ];
 
+const BreathCountdown = ({ phase, duration, color }) => {
+  const [timeLeft, setTimeLeft] = useState(duration);
+
+  useEffect(() => {
+    setTimeLeft(duration);
+    if (phase === "ready" || phase === "done") return;
+
+    const interval = setInterval(() => {
+      setTimeLeft(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [phase, duration]);
+
+  if (phase === "ready" || phase === "done") return null;
+
+  return <span className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
+};
+
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
     <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
@@ -60,7 +79,7 @@ export default function App() {
   // State: Session
   const [breathPhase, setBreathPhase] = useState("ready"); // ready | inhale | hold | exhale | done
   const [breathCount, setBreathCount] = useState(0);
-  const [breathTimer, setBreathTimer] = useState(0);
+  const [breathDuration, setBreathDuration] = useState(0);
   const [moodWord, setMoodWord] = useState("");
   const [affirmation, setAffirmation] = useState("");
 
@@ -69,7 +88,7 @@ export default function App() {
   const [adminPass, setAdminPass] = useState("");
   const [isAdminAuth, setIsAdminAuth] = useState(false);
 
-  const intervalRef = useRef(null);
+  const timeoutRef = useRef(null);
 
   // Security: Hash password to avoid storing plaintext in client bundle
   useEffect(() => {
@@ -115,27 +134,21 @@ export default function App() {
     }
     const step = BREATH_SEQUENCE[stepIndex];
     setBreathPhase(step.phase);
-    setBreathTimer(step.duration);
+    setBreathDuration(step.duration);
 
-    let elapsed = 0;
-    clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
-      elapsed++;
-      setBreathTimer(step.duration - elapsed);
-      if (elapsed >= step.duration) {
-        clearInterval(intervalRef.current);
-        const nextStep = stepIndex + 1;
-        if (nextStep >= BREATH_SEQUENCE.length) {
-          setBreathCount(cycleIndex + 1);
-          runBreathCycle(cycleIndex + 1, 0);
-        } else {
-          runBreathCycle(cycleIndex, nextStep);
-        }
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      const nextStep = stepIndex + 1;
+      if (nextStep >= BREATH_SEQUENCE.length) {
+        setBreathCount(cycleIndex + 1);
+        runBreathCycle(cycleIndex + 1, 0);
+      } else {
+        runBreathCycle(cycleIndex, nextStep);
       }
-    }, 1000);
+    }, step.duration * 1000);
   };
 
-  useEffect(() => () => clearInterval(intervalRef.current), []);
+  useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
   // --- LOGIC: COMPLETION ---
   const completeSession = () => {
@@ -267,9 +280,7 @@ export default function App() {
                 <span className="text-xs tracking-widest uppercase text-slate-300">
                   {breathPhase === "ready" ? "Ready" : breathPhase}
                 </span>
-                {breathPhase !== "ready" && (
-                  <span className={`text-3xl font-light mt-2 ${u.color}`}>{breathTimer}</span>
-                )}
+                <BreathCountdown phase={breathPhase} duration={breathDuration} color={u.color} />
               </div>
             </div>
 

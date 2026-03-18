@@ -1,3 +1,3 @@
-## 2024-05-24 - Native Disabled States for Interactive Cards
-**Learning:** Custom interactive elements (like cards built with `<button>`) often rely on CSS for visual disabled states but miss the native `disabled` attribute, allowing focus and requiring manual click prevention.
-**Action:** Always use the native `disabled` attribute on `<button>` elements when they should be inactive, preventing both keyboard focus and click events naturally while improving semantic accessibility for screen readers.
+## 2024-03-17 - Consistent Keyboard Focus on Secondary Actions
+**Learning:** Many secondary buttons in custom React apps lose default keyboard focus styles when custom Tailwind classes are applied, making keyboard navigation difficult for screen reader or power users. Disabled states on custom buttons also often lack visual distinction (e.g. opacity-50) if not explicitly set.
+**Action:** Always add focus-visible:ring and opacity-50 (for disabled) to custom buttons to ensure a11y standards.

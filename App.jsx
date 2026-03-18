@@ -244,7 +244,7 @@ export default function App() {
             <button
               onClick={startBreathing}
               disabled={breathPhase !== "ready"}
-              className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all
+              className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
                 ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 cursor-not-allowed'}`}
             >
               {breathPhase === "ready" ? "Begin" : "Focus"}
@@ -279,15 +279,15 @@ export default function App() {
             <div className="flex gap-4">
               <button
                 onClick={() => setScreen("home")}
-                className="flex-1 py-4 rounded-xl border border-slate-700 text-slate-400 text-xs tracking-widest uppercase hover:bg-slate-800 transition-colors"
+                className="flex-1 py-4 rounded-xl border border-slate-700 text-slate-400 text-xs tracking-widest uppercase hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               >
                 Back
               </button>
               <button
                 onClick={completeSession}
                 disabled={!moodWord.trim()}
-                className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all
-                  ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600'}`}
+                className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
+                  ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600 opacity-50 cursor-not-allowed'}`}
               >
                 Complete
               </button>
@@ -354,7 +354,7 @@ export default function App() {
 
         <button
           onClick={() => { setScreen("home"); setActiveUser(null); setEarnedReward(null); }}
-          className="w-full py-4 mt-8 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-xs tracking-widest uppercase hover:bg-slate-700 transition-colors"
+          className="w-full py-4 mt-8 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-xs tracking-widest uppercase hover:bg-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
         >
           Return to Dashboard
         </button>
@@ -382,7 +382,7 @@ export default function App() {
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">
-              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400">Cancel</button>
+              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>
         ) : (
@@ -405,7 +405,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold">Lock System</button>
+            <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Lock System</button>
           </div>
         )}
       </div>

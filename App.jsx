@@ -225,7 +225,7 @@ export default function App() {
                   ${breathPhase === 'ready' ? 'scale-100' : ''}
                 `}
                 style={{ boxShadow: breathPhase !== 'ready' ? `0 0 40px var(--tw-shadow-color)` : 'none' }}
-                shadow-color={u.color}
+                data-shadow-color={u.color}
               />
 
               <div className="relative z-10 flex flex-col items-center">

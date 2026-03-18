@@ -199,7 +199,7 @@ export default function App() {
               }}
               className={`w-full relative overflow-hidden rounded-2xl p-6 flex items-center justify-between transition-all duration-300 border backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950
                 ${isDone
-                  ? `bg-slate-800/40 ${u.border} opacity-80 cursor-not-allowed`
+                  ? `bg-slate-800/40 ${u.border} opacity-50 cursor-not-allowed`
                   : `bg-slate-800/60 border-slate-700 hover:bg-slate-800 hover:border-slate-600 shadow-lg`}`}
             >
               <div className="flex items-center gap-4 relative z-10">
@@ -277,7 +277,7 @@ export default function App() {
               onClick={startBreathing}
               disabled={breathPhase !== "ready"}
               className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
-                ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 cursor-not-allowed'}`}
+                ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 opacity-50 cursor-not-allowed'}`}
             >
               {breathPhase === "ready" ? "Begin" : "Focus"}
             </button>
@@ -303,6 +303,11 @@ export default function App() {
                 placeholder="Current state..."
                 value={moodWord}
                 onChange={e => setMoodWord(e.target.value.split(" ")[0])}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && moodWord.trim()) {
+                    completeSession();
+                  }
+                }}
                 className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />

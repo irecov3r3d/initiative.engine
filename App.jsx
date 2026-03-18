@@ -32,6 +32,41 @@ const USERS = {
   morgan: { id: 'morgan', name: "Morgan", color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/30", glow: "shadow-pink-500/20" },
 };
 
+const USER_LIST = Object.values(USERS);
+
+const BREATH_SEQUENCE = [
+  { phase: "inhale", duration: 4, scale: "scale-150" },
+  { phase: "hold", duration: 4, scale: "scale-150" },
+  { phase: "exhale", duration: 6, scale: "scale-90" },
+];
+
+const BreathCountdown = ({ phase, duration, color }) => {
+  const [timeLeft, setTimeLeft] = useState(duration);
+
+  useEffect(() => {
+    setTimeLeft(duration);
+    if (phase === "ready" || phase === "done") return;
+
+    const interval = setInterval(() => {
+      setTimeLeft(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [phase, duration]);
+
+  if (phase === "ready" || phase === "done") return null;
+
+  return <span className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
+};
+
+const BackgroundGradients = React.memo(() => (
+  <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
+    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
+    <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] mix-blend-screen transform-gpu will-change-transform" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-800/30 rounded-full blur-[100px] mix-blend-screen transform-gpu will-change-transform" />
+  </div>
+));
+
 // --- MAIN APPLICATION ---
 export default function App() {
   const [screen, setScreen] = useState("home"); // home | session | complete | admin
@@ -44,23 +79,48 @@ export default function App() {
   // State: Session
   const [breathPhase, setBreathPhase] = useState("ready"); // ready | inhale | hold | exhale | done
   const [breathCount, setBreathCount] = useState(0);
-  const [breathTimer, setBreathTimer] = useState(0);
+  const [breathDuration, setBreathDuration] = useState(0);
   const [moodWord, setMoodWord] = useState("");
   const [affirmation, setAffirmation] = useState("");
 
   // State: Rewards & Admin
   const [earnedReward, setEarnedReward] = useState(null);
   const [adminPass, setAdminPass] = useState("");
+  const [isAdminAuth, setIsAdminAuth] = useState(false);
 
-  const intervalRef = useRef(null);
+  const timeoutRef = useRef(null);
+
+  // Security: Hash password to avoid storing plaintext in client bundle
+  useEffect(() => {
+    let ignore = false;
+    const checkAdminPass = async () => {
+      if (!adminPass) {
+        setIsAdminAuth(false);
+        return;
+      }
+      try {
+        if (import.meta.env.VITE_ADMIN_PASS_HASH) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(adminPass);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+          if (!ignore) {
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          }
+        } else {
+          // Fallback to checking plaintext if VITE_ADMIN_PASS_HASH is missing or in insecure context
+          if (!ignore) setIsAdminAuth(adminPass === import.meta.env.VITE_ADMIN_PASS);
+        }
+      } catch (err) {
+        if (!ignore) setIsAdminAuth(false);
+      }
+    };
+    checkAdminPass();
+    return () => { ignore = true; };
+  }, [adminPass]);
 
   // --- LOGIC: BREATHING ---
-  const breathSequence = [
-    { phase: "inhale", duration: 4, scale: "scale-150" },
-    { phase: "hold", duration: 4, scale: "scale-150" },
-    { phase: "exhale", duration: 6, scale: "scale-90" },
-  ];
-
   const startBreathing = () => {
     setBreathCount(0);
     runBreathCycle(0, 0);
@@ -72,33 +132,28 @@ export default function App() {
       setAffirmation(AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)]);
       return;
     }
-    const step = breathSequence[stepIndex];
+    const step = BREATH_SEQUENCE[stepIndex];
     setBreathPhase(step.phase);
-    setBreathTimer(step.duration);
+    setBreathDuration(step.duration);
 
-    let elapsed = 0;
-    clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
-      elapsed++;
-      setBreathTimer(step.duration - elapsed);
-      if (elapsed >= step.duration) {
-        clearInterval(intervalRef.current);
-        const nextStep = stepIndex + 1;
-        if (nextStep >= breathSequence.length) {
-          setBreathCount(cycleIndex + 1);
-          runBreathCycle(cycleIndex + 1, 0);
-        } else {
-          runBreathCycle(cycleIndex, nextStep);
-        }
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      const nextStep = stepIndex + 1;
+      if (nextStep >= BREATH_SEQUENCE.length) {
+        setBreathCount(cycleIndex + 1);
+        runBreathCycle(cycleIndex + 1, 0);
+      } else {
+        runBreathCycle(cycleIndex, nextStep);
       }
-    }, 1000);
+    }, step.duration * 1000);
   };
 
-  useEffect(() => () => clearInterval(intervalRef.current), []);
+  useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
   // --- LOGIC: COMPLETION ---
   const completeSession = () => {
-    if (!activeUser || !moodWord.trim()) return;
+    // Security: Validate activeUser exists in USERS to prevent potential state corruption
+    if (!activeUser || !USERS[activeUser] || !moodWord.trim()) return;
 
     const newSessionDone = { ...sessionDone, [activeUser]: true };
     setSessionDone(newSessionDone);
@@ -142,22 +197,22 @@ export default function App() {
 
       {/* User Cards */}
       <div className="space-y-4 mt-8">
-        {Object.values(USERS).map(u => {
+        {USER_LIST.map(u => {
           const isDone = sessionDone[u.id];
           return (
             <button
               key={u.id}
+              disabled={isDone}
+              aria-label={isDone ? `${u.name} session completed` : `Start session for ${u.name}`}
               onClick={() => {
-                if(!isDone) {
-                  setActiveUser(u.id);
-                  setBreathPhase("ready");
-                  setMoodWord("");
-                  setScreen("session");
-                }
+                setActiveUser(u.id);
+                setBreathPhase("ready");
+                setMoodWord("");
+                setScreen("session");
               }}
-              className={`w-full relative overflow-hidden rounded-2xl p-6 flex items-center justify-between transition-all duration-300 border backdrop-blur-md
+              className={`w-full relative overflow-hidden rounded-2xl p-6 flex items-center justify-between transition-all duration-300 border backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950
                 ${isDone
-                  ? `bg-slate-800/40 ${u.border} opacity-80 cursor-default`
+                  ? `bg-slate-800/40 ${u.border} opacity-50 cursor-not-allowed`
                   : `bg-slate-800/60 border-slate-700 hover:bg-slate-800 hover:border-slate-600 shadow-lg`}`}
             >
               <div className="flex items-center gap-4 relative z-10">
@@ -210,7 +265,7 @@ export default function App() {
             <div className="relative w-48 h-48 flex items-center justify-center">
               {/* Animated Breathing Circle */}
               <div
-                className={`absolute inset-0 rounded-full border border-white/10 transition-transform bg-gradient-to-tr from-white/5 to-transparent
+                className={`absolute inset-0 rounded-full border border-white/10 transition-transform bg-gradient-to-tr from-white/5 to-transparent transform-gpu
                   ${breathPhase === 'inhale' ? 'scale-150 duration-[4000ms] ease-out' : ''}
                   ${breathPhase === 'hold' ? 'scale-150 duration-700 ease-in-out' : ''}
                   ${breathPhase === 'exhale' ? 'scale-90 duration-[6000ms] ease-in-out' : ''}
@@ -225,17 +280,15 @@ export default function App() {
                 <span className="text-xs tracking-widest uppercase text-slate-300">
                   {breathPhase === "ready" ? "Ready" : breathPhase}
                 </span>
-                {breathPhase !== "ready" && (
-                  <span className={`text-3xl font-light mt-2 ${u.color}`}>{breathTimer}</span>
-                )}
+                <BreathCountdown phase={breathPhase} duration={breathDuration} color={u.color} />
               </div>
             </div>
 
             <button
               onClick={startBreathing}
               disabled={breathPhase !== "ready"}
-              className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all
-                ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 cursor-not-allowed'}`}
+              className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
+                ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 opacity-50 cursor-not-allowed'}`}
             >
               {breathPhase === "ready" ? "Begin" : "Focus"}
             </button>
@@ -261,6 +314,11 @@ export default function App() {
                 placeholder="Current state..."
                 value={moodWord}
                 onChange={e => setMoodWord(e.target.value.split(" ")[0])}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && moodWord.trim()) {
+                    completeSession();
+                  }
+                }}
                 className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />
@@ -269,15 +327,15 @@ export default function App() {
             <div className="flex gap-4">
               <button
                 onClick={() => setScreen("home")}
-                className="flex-1 py-4 rounded-xl border border-slate-700 text-slate-400 text-xs tracking-widest uppercase hover:bg-slate-800 transition-colors"
+                className="flex-1 py-4 rounded-xl border border-slate-700 text-slate-400 text-xs tracking-widest uppercase hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               >
                 Back
               </button>
               <button
                 onClick={completeSession}
                 disabled={!moodWord.trim()}
-                className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all
-                  ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600'}`}
+                className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
+                  ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600 opacity-50 cursor-not-allowed'}`}
               >
                 Complete
               </button>
@@ -344,7 +402,7 @@ export default function App() {
 
         <button
           onClick={() => { setScreen("home"); setActiveUser(null); setEarnedReward(null); }}
-          className="w-full py-4 mt-8 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-xs tracking-widest uppercase hover:bg-slate-700 transition-colors"
+          className="w-full py-4 mt-8 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-xs tracking-widest uppercase hover:bg-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
         >
           Return to Dashboard
         </button>
@@ -360,19 +418,21 @@ export default function App() {
         </div>
         <h2 className="text-center text-xs tracking-[0.3em] text-slate-400 uppercase mb-8">System Override</h2>
 
-        {/* 🛡️ SECURITY FIX: Replaced hardcoded admin password with environment variable to prevent secret leakage */}
-        {adminPass !== import.meta.env.VITE_ADMIN_PASS ? (
+        {/* Security: Authenticate via hashed password to prevent client bundle exposure */}
+        {!isAdminAuth ? (
           <div className="space-y-4">
             <input
               type="password"
               placeholder="Authorization Code"
               aria-label="Authorization Code"
               value={adminPass}
+              /* Security: Limit input length to prevent potential DoS from extremely long strings */
+              maxLength={64}
               onChange={e => setAdminPass(e.target.value)}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">
-              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400">Cancel</button>
+              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>
         ) : (
@@ -395,7 +455,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold">Lock System</button>
+            <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Lock System</button>
           </div>
         )}
       </div>
@@ -404,12 +464,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-slate-700 relative overflow-hidden flex items-center justify-center p-4">
-      {/* Background Gradients */}
-      <div className="fixed inset-0 z-0 opacity-40">
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] mix-blend-screen" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-800/30 rounded-full blur-[100px] mix-blend-screen" />
-      </div>
+      <BackgroundGradients />
 
       {/* Content Container */}
       <div className="relative z-10 w-full">

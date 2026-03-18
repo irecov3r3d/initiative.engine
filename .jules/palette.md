@@ -1,7 +1,7 @@
-## 2024-05-24 - Native Disabled States for Interactive Cards
-**Learning:** Custom interactive elements (like cards built with `<button>`) often rely on CSS for visual disabled states but miss the native `disabled` attribute, allowing focus and requiring manual click prevention.
-**Action:** Always use the native `disabled` attribute on `<button>` elements when they should be inactive, preventing both keyboard focus and click events naturally while improving semantic accessibility for screen readers.
+## 2024-03-17 - Consistent Keyboard Focus on Secondary Actions
+**Learning:** Many secondary buttons in custom React apps lose default keyboard focus styles when custom Tailwind classes are applied, making keyboard navigation difficult for screen reader or power users. Disabled states on custom buttons also often lack visual distinction (e.g. opacity-50) if not explicitly set.
+**Action:** Always add focus-visible:ring and opacity-50 (for disabled) to custom buttons to ensure a11y standards.
 
-## 2026-03-16 - Emergency Exits in Step-Based Flows
-**Learning:** Users can feel trapped when entering a focused, step-based workflow (like a breathing session) if there's no clear, intuitive way to cancel or go back before the action begins. Without a 'Cancel' button, the only option is often to reload the page or complete the unwanted action.
-**Action:** Always provide an 'emergency exit' or 'Cancel' option on the initial screen of a focused multi-step workflow.
+## 2024-05-18 - Single-Input Keyboard Submission
+**Learning:** For forms containing only a single input (e.g., a one-word check-in), users expect to be able to submit by pressing the 'Enter' key. Forcing them to navigate away from the input to click a "Complete" button disrupts the keyboard-first flow.
+**Action:** Always add an `onKeyDown` handler to single inputs to trigger the submit action when `e.key === 'Enter'`, ensuring any necessary validation (like checking if the input is empty) is performed before submission.

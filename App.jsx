@@ -38,6 +38,8 @@ const BREATH_SEQUENCE = [
   { phase: "exhale", duration: 6, scale: "scale-90" },
 ];
 
+const MILESTONE_TIERS = new Set([7, 14, 30, 60]);
+
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
     <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen" />
@@ -119,7 +121,7 @@ export default function App() {
 
     // Reward Check
     let rewardObj = null;
-    const isMilestone = [7, 14, 30, 60].includes(newCouple);
+    const isMilestone = MILESTONE_TIERS.has(newCouple);
 
     if (bothDone && isMilestone) {
       rewardObj = {

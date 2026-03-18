@@ -65,6 +65,9 @@ export default function App() {
   // State: Rewards & Admin
   const [earnedReward, setEarnedReward] = useState(null);
   const [adminPass, setAdminPass] = useState("");
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   const intervalRef = useRef(null);
 
@@ -103,6 +106,43 @@ export default function App() {
   };
 
   useEffect(() => () => clearInterval(intervalRef.current), []);
+
+  // --- LOGIC: ADMIN AUTH ---
+  const handleAdminAuth = async () => {
+    if (!adminPass) return;
+    setIsAuthenticating(true);
+    setAuthError("");
+
+    try {
+      /**
+       * SECURITY MITIGATION:
+       * To avoid exposing the raw VITE_ADMIN_PASS in the client-side bundle,
+       * we perform a SHA-256 hash check. The raw secret remains on the
+       * server/environment, and only the hash is used for verification.
+       *
+       * NOTE: Moving this logic to a secure backend is the ONLY way to fully
+       * secure this secret.
+       */
+      const msgUint8 = new TextEncoder().encode(adminPass);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // The backend should ideally provide the expected hash or perform the check.
+      // For this refactor, we are simulating the secure verification flow.
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      if (hashHex === import.meta.env.VITE_ADMIN_HASH) {
+        setIsAdminAuthenticated(true);
+      } else {
+        setAuthError("Invalid Authorization Code");
+      }
+    } catch (err) {
+      setAuthError("Authentication system unavailable.");
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
 
   // --- LOGIC: COMPLETION ---
   const completeSession = () => {
@@ -368,19 +408,40 @@ export default function App() {
         </div>
         <h2 className="text-center text-xs tracking-[0.3em] text-slate-400 uppercase mb-8">System Override</h2>
 
-        {/* Security: Use environment variable instead of hardcoded secret for admin override */}
-        {adminPass !== import.meta.env.VITE_ADMIN_PASS ? (
+        {!isAdminAuthenticated ? (
           <div className="space-y-4">
-            <input
-              type="password"
-              placeholder="Authorization Code"
-              aria-label="Authorization Code"
-              value={adminPass}
-              onChange={e => setAdminPass(e.target.value)}
-              className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-            />
+            <div className="space-y-2">
+              <input
+                type="password"
+                placeholder="Authorization Code"
+                aria-label="Authorization Code"
+                value={adminPass}
+                onChange={e => setAdminPass(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAdminAuth()}
+                disabled={isAuthenticating}
+                className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-50"
+              />
+              {authError && <p className="text-[10px] text-center text-red-400 tracking-wider uppercase">{authError}</p>}
+            </div>
             <div className="flex gap-2">
-              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400">Cancel</button>
+              <button
+                onClick={() => {
+                  setScreen("home");
+                  setAdminPass("");
+                  setAuthError("");
+                }}
+                disabled={isAuthenticating}
+                className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdminAuth}
+                disabled={isAuthenticating || !adminPass}
+                className="flex-1 py-3 bg-slate-700 border border-slate-600 rounded-xl text-xs uppercase tracking-widest text-slate-200 hover:bg-slate-600 transition-colors disabled:opacity-50"
+              >
+                {isAuthenticating ? "Verifying..." : "Verify"}
+              </button>
             </div>
           </div>
         ) : (
@@ -403,7 +464,17 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold">Lock System</button>
+            <button
+              onClick={() => {
+                setScreen("home");
+                setAdminPass("");
+                setIsAdminAuthenticated(false);
+                setAuthError("");
+              }}
+              className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-white transition-colors"
+            >
+              Lock System
+            </button>
           </div>
         )}
       </div>

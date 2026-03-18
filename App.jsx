@@ -67,8 +67,39 @@ export default function App() {
   // State: Rewards & Admin
   const [earnedReward, setEarnedReward] = useState(null);
   const [adminPass, setAdminPass] = useState("");
+  const [isAdminAuth, setIsAdminAuth] = useState(false);
 
   const intervalRef = useRef(null);
+
+  // Security: Hash password to avoid storing plaintext in client bundle
+  useEffect(() => {
+    let ignore = false;
+    const checkAdminPass = async () => {
+      if (!adminPass) {
+        setIsAdminAuth(false);
+        return;
+      }
+      try {
+        if (import.meta.env.VITE_ADMIN_PASS_HASH) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(adminPass);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+          if (!ignore) {
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          }
+        } else {
+          // Fallback to checking plaintext if VITE_ADMIN_PASS_HASH is missing or in insecure context
+          if (!ignore) setIsAdminAuth(adminPass === import.meta.env.VITE_ADMIN_PASS);
+        }
+      } catch (err) {
+        if (!ignore) setIsAdminAuth(false);
+      }
+    };
+    checkAdminPass();
+    return () => { ignore = true; };
+  }, [adminPass]);
 
   // --- LOGIC: BREATHING ---
   const startBreathing = () => {
@@ -370,8 +401,8 @@ export default function App() {
         </div>
         <h2 className="text-center text-xs tracking-[0.3em] text-slate-400 uppercase mb-8">System Override</h2>
 
-        {/* Security: Use environment variable instead of hardcoded secret for admin override */}
-        {adminPass !== import.meta.env.VITE_ADMIN_PASS ? (
+        {/* Security: Authenticate via hashed password to prevent client bundle exposure */}
+        {!isAdminAuth ? (
           <div className="space-y-4">
             <input
               type="password"

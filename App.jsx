@@ -91,6 +91,7 @@ export default function App() {
   const timeoutRef = useRef(null);
 
   // Security: Hash password to avoid storing plaintext in client bundle
+  // Performance: Debounce expensive hashing operation to avoid main thread blocking
   useEffect(() => {
     let ignore = false;
     const checkAdminPass = async () => {
@@ -116,8 +117,12 @@ export default function App() {
         if (!ignore) setIsAdminAuth(false);
       }
     };
-    checkAdminPass();
-    return () => { ignore = true; };
+
+    const timeoutId = setTimeout(checkAdminPass, 300);
+    return () => {
+      ignore = true;
+      clearTimeout(timeoutId);
+    };
   }, [adminPass]);
 
   // --- LOGIC: BREATHING ---

@@ -187,7 +187,7 @@ export default function App() {
       <div className="text-center space-y-2">
         <h1 className="text-xs tracking-[0.3em] text-slate-400 uppercase">Initiative Engine</h1>
         <div className="flex justify-center items-center gap-3">
-          <Heart className={`w-5 h-5 ${sessionDone.cade && sessionDone.morgan ? 'text-indigo-400 fill-indigo-400/20' : 'text-slate-600'}`} />
+          <Heart aria-hidden="true" className={`w-5 h-5 ${sessionDone.cade && sessionDone.morgan ? 'text-indigo-400 fill-indigo-400/20' : 'text-slate-600'}`} />
           <h2 className="text-3xl font-light tracking-widest text-slate-200">
             {streaks.couple} <span className="text-sm text-slate-500">DAYS</span>
           </h2>
@@ -217,12 +217,12 @@ export default function App() {
             >
               <div className="flex items-center gap-4 relative z-10">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center border ${isDone ? u.bg + ' ' + u.border : 'bg-slate-900 border-slate-700'}`}>
-                  {isDone ? <CheckCircle2 className={`w-6 h-6 ${u.color}`} /> : <Shield className="w-5 h-5 text-slate-400" />}
+                  {isDone ? <CheckCircle2 aria-hidden="true" className={`w-6 h-6 ${u.color}`} /> : <Shield aria-hidden="true" className="w-5 h-5 text-slate-400" />}
                 </div>
                 <div className="text-left">
                   <h3 className={`text-lg tracking-wider ${isDone ? u.color : 'text-slate-200'}`}>{u.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <Flame className={`w-3 h-3 ${isDone ? u.color : 'text-slate-500'}`} />
+                    <Flame aria-hidden="true" className={`w-3 h-3 ${isDone ? u.color : 'text-slate-500'}`} />
                     <span className="text-xs text-slate-400">{streaks[u.id]} Day Streak</span>
                   </div>
                 </div>
@@ -276,7 +276,7 @@ export default function App() {
               />
 
               <div className="relative z-10 flex flex-col items-center">
-                <Wind className={`w-8 h-8 mb-2 ${u.color}`} />
+                <Wind aria-hidden="true" className={`w-8 h-8 mb-2 ${u.color}`} />
                 <span className="text-xs tracking-widest uppercase text-slate-300">
                   {breathPhase === "ready" ? "Ready" : breathPhase}
                 </span>
@@ -353,7 +353,7 @@ export default function App() {
     return (
       <div className="w-full max-w-md mx-auto space-y-6 animate-in zoom-in-95 duration-500">
         <div className={`text-center p-8 rounded-3xl border ${u.border} bg-slate-800/50 backdrop-blur-md`}>
-          <CheckCircle2 className={`w-16 h-16 mx-auto mb-4 ${u.color}`} />
+          <CheckCircle2 aria-hidden="true" className={`w-16 h-16 mx-auto mb-4 ${u.color}`} />
           <h2 className={`text-xl tracking-widest uppercase ${u.color}`}>{u.name} Validated</h2>
           <p className="text-sm text-slate-400 mt-2">Personal Streak: {streaks[activeUser]} Days</p>
         </div>
@@ -362,7 +362,7 @@ export default function App() {
           <div className="text-center p-6 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 backdrop-blur-sm">
             <h3 className="text-[10px] tracking-[0.3em] text-indigo-400 uppercase mb-2">Together Bonus Active</h3>
             <div className="flex items-center justify-center gap-2">
-              <Award className="w-5 h-5 text-indigo-400" />
+              <Award aria-hidden="true" className="w-5 h-5 text-indigo-400" />
               <span className="text-2xl font-light text-slate-200">{streaks.couple} Days</span>
             </div>
           </div>
@@ -414,7 +414,7 @@ export default function App() {
     <div className="w-full max-w-md mx-auto space-y-6 animate-in fade-in">
       <div className="bg-slate-800/60 border border-slate-700 p-8 rounded-3xl backdrop-blur-md">
         <div className="flex justify-center mb-6">
-          <Lock className="w-8 h-8 text-slate-500" />
+          <Lock aria-hidden="true" className="w-8 h-8 text-slate-500" />
         </div>
         <h2 className="text-center text-xs tracking-[0.3em] text-slate-400 uppercase mb-8">System Override</h2>
 

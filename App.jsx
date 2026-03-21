@@ -110,8 +110,9 @@ export default function App() {
             setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
           }
         } else {
-          // Fallback to checking plaintext if VITE_ADMIN_PASS_HASH is missing or in insecure context
-          if (!ignore) setIsAdminAuth(adminPass === import.meta.env.VITE_ADMIN_PASS);
+          // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
+          // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
+          if (!ignore) setIsAdminAuth(false);
         }
       } catch (err) {
         if (!ignore) setIsAdminAuth(false);

@@ -9,3 +9,6 @@
 ## 2024-10-25 - Decorative Icons Screen Reader Noise
 **Learning:** `lucide-react` icons are often used purely for visual decoration alongside descriptive text. If these decorative icons lack `aria-hidden="true"`, screen readers may announce them or their SVG properties, creating a confusing and noisy experience for visually impaired users.
 **Action:** Always add `aria-hidden="true"` to purely decorative icons (like `<Heart>`, `<CheckCircle2>`, etc.) to ensure a clean and accessible screen reader experience.
+## 2024-05-30 - Context-Aware Titles for Dynamically Disabled Elements
+**Learning:** In highly interactive apps like `initiative.engine` where primary UI elements (like Start Session or Complete buttons) are dynamically disabled based on complex state logic (e.g., already completed today, missing required input), standard `disabled` attributes are insufficient. Users are often left wondering *why* the button is inactive.
+**Action:** Always provide a descriptive, state-aware `title` attribute (or a tooltip component) alongside the `disabled` property. This simple addition clarifies the requirements for interaction (e.g., "Enter a check-in word to complete") rather than leaving the user to guess.

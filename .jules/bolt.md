@@ -5,3 +5,11 @@
 ## 2026-03-18 - High-Frequency State in Parent Component
 **Learning:** Managing high-frequency, interval-based state (like a 1-second countdown timer) in the top-level parent component forces re-rendering of the entire component tree on every tick.
 **Action:** Extract high-frequency state into dedicated, localized child components (e.g., `<BreathCountdown />`) and use `setTimeout` for slower phase transitions in the parent.
+
+## 2026-03-20 - Expensive Operations on Input Keystrokes
+**Learning:** Running expensive asynchronous operations like cryptographic hashing (`crypto.subtle.digest`) on every keystroke in a controlled input blocks the main thread and causes severe VDOM thrashing.
+**Action:** Debounce expensive operations tied to input changes using `setTimeout` in the `useEffect` and clearing the timeout in the cleanup function.
+
+## 2026-03-21 - ArrayBuffer to Hex String Conversion
+**Learning:** Using `Array.from(new Uint8Array(buffer)).map(b => b.toString(16)).join('')` inside high-frequency execution paths creates significant intermediate object allocation (an array, mapped objects, string chunks) triggering excessive garbage collection.
+**Action:** Use a raw `for` loop over the `Uint8Array` view to iteratively concatenate strings (`hashHex += view[i].toString(16)`), keeping memory overhead low and execution time faster. Additionally, extract instances of objects like `TextEncoder` outside of component scope.

@@ -56,8 +56,10 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
   if (phase === "ready" || phase === "done") return null;
 
-  return <span className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
+  return <span aria-hidden="true" className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
 };
+
+const SHARED_ENCODER = new TextEncoder();
 
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
@@ -90,7 +92,22 @@ export default function App() {
 
   const timeoutRef = useRef(null);
 
+  // Security: Auto-lock admin session after 60 seconds to prevent unauthorized access
+  // if a user leaves the device unattended while authenticated.
+  useEffect(() => {
+    if (!isAdminAuth) return;
+
+    const timeoutId = setTimeout(() => {
+      setAdminPass("");
+      setIsAdminAuth(false);
+      setScreen("home");
+    }, 60000); // 60 seconds timeout
+
+    return () => clearTimeout(timeoutId);
+  }, [isAdminAuth, screen]);
+
   // Security: Hash password to avoid storing plaintext in client bundle
+  // Performance: Debounce expensive hashing operation to avoid main thread blocking
   useEffect(() => {
     let ignore = false;
     const checkAdminPass = async () => {
@@ -100,24 +117,31 @@ export default function App() {
       }
       try {
         if (import.meta.env.VITE_ADMIN_PASS_HASH) {
-          const encoder = new TextEncoder();
-          const data = encoder.encode(adminPass);
+          const data = SHARED_ENCODER.encode(adminPass);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
           if (!ignore) {
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const hashView = new Uint8Array(hashBuffer);
+            let hashHex = '';
+            for (let i = 0; i < hashView.length; i++) {
+              hashHex += hashView[i].toString(16).padStart(2, '0');
+            }
             setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
           }
         } else {
-          // Fallback to checking plaintext if VITE_ADMIN_PASS_HASH is missing or in insecure context
-          if (!ignore) setIsAdminAuth(adminPass === import.meta.env.VITE_ADMIN_PASS);
+          // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
+          // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
+          if (!ignore) setIsAdminAuth(false);
         }
       } catch (err) {
         if (!ignore) setIsAdminAuth(false);
       }
     };
-    checkAdminPass();
-    return () => { ignore = true; };
+
+    const timeoutId = setTimeout(checkAdminPass, 300);
+    return () => {
+      ignore = true;
+      clearTimeout(timeoutId);
+    };
   }, [adminPass]);
 
   // --- LOGIC: BREATHING ---
@@ -203,7 +227,8 @@ export default function App() {
             <button
               key={u.id}
               disabled={isDone}
-              aria-label={isDone ? `${u.name} session completed` : `Start session for ${u.name}`}
+              aria-label={isDone ? `${u.name} session completed, ${streaks[u.id]} Day Streak` : `Start session for ${u.name}, ${streaks[u.id]} Day Streak`}
+              title={isDone ? "Session already completed for today" : "Start daily session"}
               onClick={() => {
                 setActiveUser(u.id);
                 setBreathPhase("ready");
@@ -239,6 +264,7 @@ export default function App() {
           onClick={() => setScreen("admin")}
           className="text-slate-600 hover:text-slate-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 rounded-md p-1"
           aria-label="Admin Settings"
+          title="Admin Settings"
         >
           <Settings className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -277,7 +303,7 @@ export default function App() {
 
               <div className="relative z-10 flex flex-col items-center">
                 <Wind aria-hidden="true" className={`w-8 h-8 mb-2 ${u.color}`} />
-                <span className="text-xs tracking-widest uppercase text-slate-300">
+                <span aria-live="assertive" className="text-xs tracking-widest uppercase text-slate-300">
                   {breathPhase === "ready" ? "Ready" : breathPhase}
                 </span>
                 <BreathCountdown phase={breathPhase} duration={breathDuration} color={u.color} />
@@ -287,6 +313,7 @@ export default function App() {
             <button
               onClick={startBreathing}
               disabled={breathPhase !== "ready"}
+              title={breathPhase === "ready" ? "Begin breathing exercise" : "Breathing in progress"}
               className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
                 ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 opacity-50 cursor-not-allowed'}`}
             >
@@ -307,31 +334,22 @@ export default function App() {
               >
                 One Word Check-In
               </label>
-              <div className="relative">
-                <input
-                  id="moodWordInput"
-                  type="text"
-                  maxLength={20}
-                  placeholder="Current state..."
-                  value={moodWord}
-                  onChange={e => setMoodWord(e.target.value.split(" ")[0])}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && moodWord.trim()) {
-                      completeSession();
-                    }
-                  }}
-                  className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
-                    ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
-                />
-                <div
-                  aria-hidden="true"
-                  className={`absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-300 ${moodWord.trim() ? 'opacity-100' : 'opacity-0'}`}
-                >
-                  <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-400 font-mono flex items-center gap-1 shadow-sm">
-                    <span className="text-xs">↵</span> Enter
-                  </kbd>
-                </div>
-              </div>
+              <input
+                id="moodWordInput"
+                type="text"
+                autoFocus
+                maxLength={20}
+                placeholder="Current state..."
+                value={moodWord}
+                onChange={e => setMoodWord(e.target.value.split(" ")[0])}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && moodWord.trim()) {
+                    completeSession();
+                  }
+                }}
+                className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
+                  ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
+              />
             </div>
 
             <div className="flex gap-4">
@@ -344,8 +362,8 @@ export default function App() {
               <button
                 onClick={completeSession}
                 disabled={!moodWord.trim()}
-                title={!moodWord.trim() ? "Enter a check-in word to complete" : undefined}
-                className={`flex-[2] py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
+                title={!moodWord.trim() ? "Enter a check-in word to complete" : "Complete session"}
+                className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
                   ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600 opacity-50 cursor-not-allowed'}`}
               >
                 Complete
@@ -434,16 +452,19 @@ export default function App() {
           <div className="space-y-4">
             <input
               type="password"
+              autoFocus
               placeholder="Authorization Code"
               aria-label="Authorization Code"
               value={adminPass}
+              autoComplete="off"
+              spellCheck="false"
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
               onChange={e => setAdminPass(e.target.value)}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">
-              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
+              <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>
         ) : (

@@ -5,6 +5,14 @@
 ## 2024-05-18 - Single-Input Keyboard Submission
 **Learning:** For forms containing only a single input (e.g., a one-word check-in), users expect to be able to submit by pressing the 'Enter' key. Forcing them to navigate away from the input to click a "Complete" button disrupts the keyboard-first flow.
 **Action:** Always add an `onKeyDown` handler to single inputs to trigger the submit action when `e.key === 'Enter'`, ensuring any necessary validation (like checking if the input is empty) is performed before submission.
-## 2024-05-27 - [Visible Keyboard Shortcuts & Hidden Decorative Icons]
-**Learning:** Implicit keyboard shortcuts (like `onKeyDown` Enter handlers) are invisible to many users. Adding a fading `<kbd>Enter</kbd>` hint reveals the functionality without cluttering the initial UI. Also, purely decorative `lucide-react` icons create unnecessary noise for screen readers.
-**Action:** When implementing hidden keyboard shortcuts in form inputs, always include a visual hint (e.g., `<kbd>`) that appears when the input is active or populated. Always add `aria-hidden="true"` to purely decorative icons.
+
+## 2024-10-25 - Decorative Icons Screen Reader Noise
+**Learning:** `lucide-react` icons are often used purely for visual decoration alongside descriptive text. If these decorative icons lack `aria-hidden="true"`, screen readers may announce them or their SVG properties, creating a confusing and noisy experience for visually impaired users.
+**Action:** Always add `aria-hidden="true"` to purely decorative icons (like `<Heart>`, `<CheckCircle2>`, etc.) to ensure a clean and accessible screen reader experience.
+## 2024-05-30 - Context-Aware Titles for Dynamically Disabled Elements
+**Learning:** In highly interactive apps like `initiative.engine` where primary UI elements (like Start Session or Complete buttons) are dynamically disabled based on complex state logic (e.g., already completed today, missing required input), standard `disabled` attributes are insufficient. Users are often left wondering *why* the button is inactive.
+**Action:** Always provide a descriptive, state-aware `title` attribute (or a tooltip component) alongside the `disabled` property. This simple addition clarifies the requirements for interaction (e.g., "Enter a check-in word to complete") rather than leaving the user to guess.
+
+## 2024-11-20 - Dynamic Visual Timers Require Audio Pairing
+**Learning:** For features that guide the user through a time-based visual sequence (e.g., a breathing exercise with expanding/contracting circles and a fast countdown), relying strictly on visuals completely blocks visually impaired users. Standard `aria-label`s on containers do not dynamically announce fast-changing states.
+**Action:** When creating a guided sequence, place `aria-live="assertive"` on the semantic text that describes the current phase (e.g., "Inhale", "Exhale"). Simultaneously, to prevent the screen reader from overwhelmingly spamming the user with rapidly changing numbers, place `aria-hidden="true"` on the literal numerical countdown ticking every second.

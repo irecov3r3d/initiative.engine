@@ -87,48 +87,43 @@ export default function App() {
 
   // State: Rewards & Admin
   const [earnedReward, setEarnedReward] = useState(null);
-  const [adminPass, setAdminPass] = useState("");
   const [isAdminAuth, setIsAdminAuth] = useState(false);
 
   const timeoutRef = useRef(null);
+  const adminTimeoutRef = useRef(null);
 
   // Security: Hash password to avoid storing plaintext in client bundle
   // Performance: Debounce expensive hashing operation to avoid main thread blocking
-  useEffect(() => {
-    let ignore = false;
-    const checkAdminPass = async () => {
-      if (!adminPass) {
+  const handleAdminPassChange = (e) => {
+    const val = e.target.value;
+    clearTimeout(adminTimeoutRef.current);
+    adminTimeoutRef.current = setTimeout(async () => {
+      if (!val) {
         setIsAdminAuth(false);
         return;
       }
       try {
         if (import.meta.env.VITE_ADMIN_PASS_HASH) {
-          const data = SHARED_ENCODER.encode(adminPass);
+          const data = SHARED_ENCODER.encode(val);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-          if (!ignore) {
-            const hashView = new Uint8Array(hashBuffer);
-            let hashHex = '';
-            for (let i = 0; i < hashView.length; i++) {
-              hashHex += hashView[i].toString(16).padStart(2, '0');
-            }
-            setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          const hashView = new Uint8Array(hashBuffer);
+          let hashHex = '';
+          for (let i = 0; i < hashView.length; i++) {
+            hashHex += hashView[i].toString(16).padStart(2, '0');
           }
+          setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
-          if (!ignore) setIsAdminAuth(false);
+          setIsAdminAuth(false);
         }
       } catch (err) {
-        if (!ignore) setIsAdminAuth(false);
+        setIsAdminAuth(false);
       }
-    };
+    }, 300);
+  };
 
-    const timeoutId = setTimeout(checkAdminPass, 300);
-    return () => {
-      ignore = true;
-      clearTimeout(timeoutId);
-    };
-  }, [adminPass]);
+  useEffect(() => () => clearTimeout(adminTimeoutRef.current), []);
 
   // --- LOGIC: BREATHING ---
   const startBreathing = () => {
@@ -439,10 +434,10 @@ export default function App() {
               type="password"
               placeholder="Authorization Code"
               aria-label="Authorization Code"
-              value={adminPass}
+              defaultValue=""
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
-              onChange={e => setAdminPass(e.target.value)}
+              onChange={handleAdminPassChange}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">

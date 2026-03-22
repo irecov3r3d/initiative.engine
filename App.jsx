@@ -56,7 +56,7 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
   if (phase === "ready" || phase === "done") return null;
 
-  return <span className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
+  return <span aria-hidden="true" className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
 };
 
 const SHARED_ENCODER = new TextEncoder();
@@ -91,6 +91,20 @@ export default function App() {
 
   const timeoutRef = useRef(null);
   const adminTimeoutRef = useRef(null);
+
+  // Security: Auto-lock admin session after 60 seconds to prevent unauthorized access
+  // if a user leaves the device unattended while authenticated.
+  useEffect(() => {
+    if (!isAdminAuth) return;
+
+    const timeoutId = setTimeout(() => {
+      setAdminPass("");
+      setIsAdminAuth(false);
+      setScreen("home");
+    }, 60000); // 60 seconds timeout
+
+    return () => clearTimeout(timeoutId);
+  }, [isAdminAuth, screen]);
 
   // Security: Hash password to avoid storing plaintext in client bundle
   // Performance: Debounce expensive hashing operation to avoid main thread blocking
@@ -208,7 +222,7 @@ export default function App() {
             <button
               key={u.id}
               disabled={isDone}
-              aria-label={isDone ? `${u.name} session completed` : `Start session for ${u.name}`}
+              aria-label={isDone ? `${u.name} session completed, ${streaks[u.id]} Day Streak` : `Start session for ${u.name}, ${streaks[u.id]} Day Streak`}
               title={isDone ? "Session already completed for today" : "Start daily session"}
               onClick={() => {
                 setActiveUser(u.id);
@@ -284,7 +298,7 @@ export default function App() {
 
               <div className="relative z-10 flex flex-col items-center">
                 <Wind aria-hidden="true" className={`w-8 h-8 mb-2 ${u.color}`} />
-                <span className="text-xs tracking-widest uppercase text-slate-300">
+                <span aria-live="assertive" className="text-xs tracking-widest uppercase text-slate-300">
                   {breathPhase === "ready" ? "Ready" : breathPhase}
                 </span>
                 <BreathCountdown phase={breathPhase} duration={breathDuration} color={u.color} />
@@ -318,6 +332,7 @@ export default function App() {
               <input
                 id="moodWordInput"
                 type="text"
+                autoFocus
                 maxLength={20}
                 placeholder="Current state..."
                 value={moodWord}
@@ -432,16 +447,19 @@ export default function App() {
           <div className="space-y-4">
             <input
               type="password"
+              autoFocus
               placeholder="Authorization Code"
               aria-label="Authorization Code"
-              defaultValue=""
+              value={adminPass}
+              autoComplete="off"
+              spellCheck="false"
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
               onChange={handleAdminPassChange}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">
-              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
+              <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>
         ) : (

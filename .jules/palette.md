@@ -12,3 +12,7 @@
 ## 2024-05-30 - Context-Aware Titles for Dynamically Disabled Elements
 **Learning:** In highly interactive apps like `initiative.engine` where primary UI elements (like Start Session or Complete buttons) are dynamically disabled based on complex state logic (e.g., already completed today, missing required input), standard `disabled` attributes are insufficient. Users are often left wondering *why* the button is inactive.
 **Action:** Always provide a descriptive, state-aware `title` attribute (or a tooltip component) alongside the `disabled` property. This simple addition clarifies the requirements for interaction (e.g., "Enter a check-in word to complete") rather than leaving the user to guess.
+
+## 2024-11-20 - Dynamic Visual Timers Require Audio Pairing
+**Learning:** For features that guide the user through a time-based visual sequence (e.g., a breathing exercise with expanding/contracting circles and a fast countdown), relying strictly on visuals completely blocks visually impaired users. Standard `aria-label`s on containers do not dynamically announce fast-changing states.
+**Action:** When creating a guided sequence, place `aria-live="assertive"` on the semantic text that describes the current phase (e.g., "Inhale", "Exhale"). Simultaneously, to prevent the screen reader from overwhelmingly spamming the user with rapidly changing numbers, place `aria-hidden="true"` on the literal numerical countdown ticking every second.

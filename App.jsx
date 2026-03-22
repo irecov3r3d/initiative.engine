@@ -59,6 +59,8 @@ const BreathCountdown = ({ phase, duration, color }) => {
   return <span className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
 };
 
+const SHARED_ENCODER = new TextEncoder();
+
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
     <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
@@ -101,12 +103,14 @@ export default function App() {
       }
       try {
         if (import.meta.env.VITE_ADMIN_PASS_HASH) {
-          const encoder = new TextEncoder();
-          const data = encoder.encode(adminPass);
+          const data = SHARED_ENCODER.encode(adminPass);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
           if (!ignore) {
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const hashView = new Uint8Array(hashBuffer);
+            let hashHex = '';
+            for (let i = 0; i < hashView.length; i++) {
+              hashHex += hashView[i].toString(16).padStart(2, '0');
+            }
             setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
           }
         } else {

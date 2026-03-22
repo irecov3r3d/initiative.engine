@@ -213,6 +213,7 @@ export default function App() {
               key={u.id}
               disabled={isDone}
               aria-label={isDone ? `${u.name} session completed` : `Start session for ${u.name}`}
+              title={isDone ? "Session already completed for today" : "Start daily session"}
               onClick={() => {
                 setActiveUser(u.id);
                 setBreathPhase("ready");
@@ -248,6 +249,7 @@ export default function App() {
           onClick={() => setScreen("admin")}
           className="text-slate-600 hover:text-slate-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 rounded-md p-1"
           aria-label="Admin Settings"
+          title="Admin Settings"
         >
           <Settings className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -296,6 +298,7 @@ export default function App() {
             <button
               onClick={startBreathing}
               disabled={breathPhase !== "ready"}
+              title={breathPhase === "ready" ? "Begin breathing exercise" : "Breathing in progress"}
               className={`w-full max-w-[200px] py-4 rounded-xl border text-sm tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
                 ${breathPhase === "ready" ? `bg-slate-800 ${u.border} text-white hover:bg-slate-700` : 'bg-transparent border-transparent text-slate-600 opacity-50 cursor-not-allowed'}`}
             >
@@ -343,6 +346,7 @@ export default function App() {
               <button
                 onClick={completeSession}
                 disabled={!moodWord.trim()}
+                title={!moodWord.trim() ? "Enter a check-in word to complete" : "Complete session"}
                 className={`flex-2 py-4 px-8 rounded-xl border text-xs tracking-widest uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
                   ${moodWord.trim() ? `${u.bg} ${u.border} ${u.color} hover:bg-opacity-20` : 'bg-slate-800 border-slate-700 text-slate-600 opacity-50 cursor-not-allowed'}`}
               >

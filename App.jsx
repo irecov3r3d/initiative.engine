@@ -92,6 +92,20 @@ export default function App() {
 
   const timeoutRef = useRef(null);
 
+  // Security: Auto-lock admin session after 60 seconds to prevent unauthorized access
+  // if a user leaves the device unattended while authenticated.
+  useEffect(() => {
+    if (!isAdminAuth) return;
+
+    const timeoutId = setTimeout(() => {
+      setAdminPass("");
+      setIsAdminAuth(false);
+      setScreen("home");
+    }, 60000); // 60 seconds timeout
+
+    return () => clearTimeout(timeoutId);
+  }, [isAdminAuth, screen]);
+
   // Security: Hash password to avoid storing plaintext in client bundle
   // Performance: Debounce expensive hashing operation to avoid main thread blocking
   useEffect(() => {
@@ -442,13 +456,15 @@ export default function App() {
               placeholder="Authorization Code"
               aria-label="Authorization Code"
               value={adminPass}
+              autoComplete="off"
+              spellCheck="false"
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
               onChange={e => setAdminPass(e.target.value)}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">
-              <button onClick={() => setScreen("home")} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
+              <button onClick={() => { setScreen("home"); setAdminPass(""); }} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>
         ) : (

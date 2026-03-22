@@ -56,7 +56,7 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
   if (phase === "ready" || phase === "done") return null;
 
-  return <span className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
+  return <span aria-hidden="true" className={`text-3xl font-light mt-2 ${color}`}>{timeLeft}</span>;
 };
 
 const SHARED_ENCODER = new TextEncoder();
@@ -213,7 +213,7 @@ export default function App() {
             <button
               key={u.id}
               disabled={isDone}
-              aria-label={isDone ? `${u.name} session completed` : `Start session for ${u.name}`}
+              aria-label={isDone ? `${u.name} session completed, ${streaks[u.id]} Day Streak` : `Start session for ${u.name}, ${streaks[u.id]} Day Streak`}
               title={isDone ? "Session already completed for today" : "Start daily session"}
               onClick={() => {
                 setActiveUser(u.id);
@@ -289,7 +289,7 @@ export default function App() {
 
               <div className="relative z-10 flex flex-col items-center">
                 <Wind aria-hidden="true" className={`w-8 h-8 mb-2 ${u.color}`} />
-                <span className="text-xs tracking-widest uppercase text-slate-300">
+                <span aria-live="assertive" className="text-xs tracking-widest uppercase text-slate-300">
                   {breathPhase === "ready" ? "Ready" : breathPhase}
                 </span>
                 <BreathCountdown phase={breathPhase} duration={breathDuration} color={u.color} />
@@ -323,6 +323,7 @@ export default function App() {
               <input
                 id="moodWordInput"
                 type="text"
+                autoFocus
                 maxLength={20}
                 placeholder="Current state..."
                 value={moodWord}
@@ -437,6 +438,7 @@ export default function App() {
           <div className="space-y-4">
             <input
               type="password"
+              autoFocus
               placeholder="Authorization Code"
               aria-label="Authorization Code"
               value={adminPass}

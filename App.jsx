@@ -88,6 +88,7 @@ export default function App() {
   // State: Rewards & Admin
   const [earnedReward, setEarnedReward] = useState(null);
   const [isAdminAuth, setIsAdminAuth] = useState(false);
+  const [adminPass, setAdminPass] = useState("");
 
   const timeoutRef = useRef(null);
   const adminTimeoutRef = useRef(null);
@@ -450,6 +451,7 @@ export default function App() {
               autoFocus
               placeholder="Authorization Code"
               aria-label="Authorization Code"
+              title="Enter the system override authorization code"
               value={adminPass}
               autoComplete="off"
               spellCheck="false"

@@ -452,6 +452,7 @@ export default function App() {
               autoFocus
               placeholder="Authorization Code"
               aria-label="Authorization Code"
+              title="Enter the system override authorization code"
               value={adminPass}
               autoComplete="off"
               spellCheck="false"

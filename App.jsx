@@ -40,6 +40,8 @@ const BREATH_SEQUENCE = [
   { phase: "exhale", duration: 6, scale: "scale-90" },
 ];
 
+const MILESTONE_TIERS = new Set([7, 14, 30, 60]);
+
 const BreathCountdown = ({ phase, duration, color }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
 
@@ -187,7 +189,8 @@ export default function App() {
 
     // Reward Check
     let rewardObj = null;
-    const isMilestone = [7, 14, 30, 60].includes(newCouple);
+    // Performance: Use a module-level Set for O(1) lookup and to avoid per-render array allocation overhead.
+    const isMilestone = MILESTONE_TIERS.has(newCouple);
 
     if (bothDone && isMilestone) {
       rewardObj = {

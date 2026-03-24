@@ -13,3 +13,7 @@
 ## 2026-03-21 - ArrayBuffer to Hex String Conversion
 **Learning:** Using `Array.from(new Uint8Array(buffer)).map(b => b.toString(16)).join('')` inside high-frequency execution paths creates significant intermediate object allocation (an array, mapped objects, string chunks) triggering excessive garbage collection.
 **Action:** Use a raw `for` loop over the `Uint8Array` view to iteratively concatenate strings (`hashHex += view[i].toString(16)`), keeping memory overhead low and execution time faster. Additionally, extract instances of objects like `TextEncoder` outside of component scope.
+
+## 2024-05-20 - Static Array Allocations in Functions
+**Learning:** Defining inline arrays for membership checks (e.g., `[7, 14, ...].includes(val)`) inside functions causes unnecessary memory allocation on every execution and results in O(N) lookup time.
+**Action:** Extract static membership lists into module-level `Set` objects to eliminate per-call allocation overhead and achieve O(1) lookup complexity.

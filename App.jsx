@@ -107,6 +107,15 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, [isAdminAuth, screen]);
 
+  // Security: Automatically clear sensitive authentication state if the user navigates away
+  // from the admin screen without explicitly locking the system, preventing authorization bypass.
+  useEffect(() => {
+    if (screen !== "admin" && isAdminAuth) {
+      setIsAdminAuth(false);
+      setAdminPass("");
+    }
+  }, [screen, isAdminAuth]);
+
   // Security: Hash password to avoid storing plaintext in client bundle
   // Performance: Debounce expensive hashing operation to avoid main thread blocking
   const handleAdminPassChange = (e) => {

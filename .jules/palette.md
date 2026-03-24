@@ -16,3 +16,7 @@
 ## 2024-11-20 - Dynamic Visual Timers Require Audio Pairing
 **Learning:** For features that guide the user through a time-based visual sequence (e.g., a breathing exercise with expanding/contracting circles and a fast countdown), relying strictly on visuals completely blocks visually impaired users. Standard `aria-label`s on containers do not dynamically announce fast-changing states.
 **Action:** When creating a guided sequence, place `aria-live="assertive"` on the semantic text that describes the current phase (e.g., "Inhale", "Exhale"). Simultaneously, to prevent the screen reader from overwhelmingly spamming the user with rapidly changing numbers, place `aria-hidden="true"` on the literal numerical countdown ticking every second.
+
+## 2024-05-30 - Context-Aware Titles for Generic Actions
+**Learning:** Generic action buttons (like "Back", "Cancel", or simple text inputs) often lack sufficient context for users relying on screen readers or tooltips, especially in a multi-screen application where the destination or purpose might be ambiguous.
+**Action:** Always provide descriptive, context-aware `title` attributes (e.g., "Cancel session and return to dashboard") to clarify the result of interacting with generic UI elements, ensuring an accessible and intuitive experience.

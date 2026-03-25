@@ -93,16 +93,19 @@ export default function App() {
   const timeoutRef = useRef(null);
   const adminTimeoutRef = useRef(null);
 
+  const lockAdmin = () => {
+    clearTimeout(adminTimeoutRef.current);
+    setAdminPass("");
+    setIsAdminAuth(false);
+    setScreen("home");
+  };
+
   // Security: Auto-lock admin session after 60 seconds to prevent unauthorized access
   // if a user leaves the device unattended while authenticated.
   useEffect(() => {
     if (!isAdminAuth) return;
 
-    const timeoutId = setTimeout(() => {
-      setAdminPass("");
-      setIsAdminAuth(false);
-      setScreen("home");
-    }, 60000); // 60 seconds timeout
+    const timeoutId = setTimeout(lockAdmin, 60000); // 60 seconds timeout
 
     return () => clearTimeout(timeoutId);
   }, [isAdminAuth, screen]);
@@ -462,7 +465,7 @@ export default function App() {
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">
-              <button onClick={() => { setScreen("home"); setAdminPass(""); setIsAdminAuth(false); }} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
+              <button onClick={lockAdmin} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>
         ) : (
@@ -485,7 +488,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <button onClick={() => { setScreen("home"); setAdminPass(""); setIsAdminAuth(false); }} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Lock System</button>
+            <button onClick={lockAdmin} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Lock System</button>
           </div>
         )}
       </div>

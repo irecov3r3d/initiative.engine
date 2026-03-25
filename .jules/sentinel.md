@@ -18,3 +18,7 @@
 **Vulnerability:** Navigating away from the admin panel without explicitly clearing the authentication state (`isAdminAuth`) allowed the session to persist in memory, potentially enabling unauthorized access if the application state was not refreshed.
 **Learning:** Even with an inactivity timeout, user-initiated navigation away from a secure area must explicitly clear the authentication session to prevent immediate authorization bypass upon returning.
 **Prevention:** Always explicitly clear authentication state (`setIsAdminAuth(false)`) when a user manually cancels or exits a secure session flow, in addition to automated timeout mechanisms.
+## 2025-10-24 - Race Condition in Debounced Authentication leading to Authorization Bypass
+**Vulnerability:** A race condition existed where a user could enter the correct admin password, immediately click "Cancel", and navigate away. The debounced authentication handler would then fire in the background, inadvertently granting unauthorized administrative access to the session.
+**Learning:** In purely client-side applications, pending asynchronous operations (like debounced state updates or timeouts) can resolve after a component has logically "closed" or navigated away, corrupting the new state.
+**Prevention:** Always explicitly clear pending asynchronous operations (such as `clearTimeout(adminTimeoutRef.current)`) alongside clearing sensitive state variables whenever a user cancels or explicitly exits a secure session flow.

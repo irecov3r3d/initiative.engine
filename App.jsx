@@ -61,6 +61,18 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
 const SHARED_ENCODER = new TextEncoder();
 
+const safeCompare = (a, b) => {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  // Use a bitwise accumulator to compare all characters without early exit.
+  // We iterate over the length of 'a' (the generated hash) to ensure that
+  // for a fixed input length, execution time is independent of the secret 'b'.
+  let result = a.length ^ b.length;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ (b.charCodeAt(i) | 0);
+  }
+  return result === 0;
+};
+
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
     <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
@@ -127,7 +139,7 @@ export default function App() {
           for (let i = 0; i < hashView.length; i++) {
             hashHex += hashView[i].toString(16).padStart(2, '0');
           }
-          setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          setIsAdminAuth(safeCompare(hashHex, import.meta.env.VITE_ADMIN_PASS_HASH));
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.

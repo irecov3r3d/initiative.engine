@@ -18,3 +18,7 @@
 **Vulnerability:** Navigating away from the admin panel without explicitly clearing the authentication state (`isAdminAuth`) allowed the session to persist in memory, potentially enabling unauthorized access if the application state was not refreshed.
 **Learning:** Even with an inactivity timeout, user-initiated navigation away from a secure area must explicitly clear the authentication session to prevent immediate authorization bypass upon returning.
 **Prevention:** Always explicitly clear authentication state (`setIsAdminAuth(false)`) when a user manually cancels or exits a secure session flow, in addition to automated timeout mechanisms.
+## 2025-02-14 - Fix Timing Attack Vulnerability in Hash Comparison
+**Vulnerability:** Timing attack in hash comparison using strict equality.
+**Learning:** Using `===` for sensitive data comparison allows attackers to deduce the content of the secret by measuring time differences.
+**Prevention:** Use constant-time comparison algorithms for all sensitive data verification.

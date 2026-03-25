@@ -33,6 +33,7 @@ const USERS = {
 };
 
 const USER_LIST = Object.values(USERS);
+const MILESTONE_TIERS = new Set([7, 14, 30, 60]);
 
 const BREATH_SEQUENCE = [
   { phase: "inhale", duration: 4, scale: "scale-150" },
@@ -187,7 +188,7 @@ export default function App() {
 
     // Reward Check
     let rewardObj = null;
-    const isMilestone = [7, 14, 30, 60].includes(newCouple);
+    const isMilestone = MILESTONE_TIERS.has(newCouple);
 
     if (bothDone && isMilestone) {
       rewardObj = {

@@ -93,9 +93,11 @@ export default function App() {
 
   const timeoutRef = useRef(null);
   const adminTimeoutRef = useRef(null);
+  const adminAuthSequenceRef = useRef(0);
 
   const lockAdmin = () => {
     clearTimeout(adminTimeoutRef.current);
+    adminAuthSequenceRef.current++;
     setAdminPass("");
     setIsAdminAuth(false);
     setScreen("home");
@@ -115,6 +117,8 @@ export default function App() {
   // from the admin screen without explicitly locking the system, preventing authorization bypass.
   useEffect(() => {
     if (screen !== "admin" && isAdminAuth) {
+      clearTimeout(adminTimeoutRef.current);
+      adminAuthSequenceRef.current++;
       setIsAdminAuth(false);
       setAdminPass("");
     }
@@ -126,9 +130,15 @@ export default function App() {
     const val = e.target.value;
     setAdminPass(val);
     clearTimeout(adminTimeoutRef.current);
+
+    // Track authentication attempt sequence to prevent race conditions
+    const currentSequence = ++adminAuthSequenceRef.current;
+
     adminTimeoutRef.current = setTimeout(async () => {
       if (!val) {
-        setIsAdminAuth(false);
+        if (adminAuthSequenceRef.current === currentSequence) {
+          setIsAdminAuth(false);
+        }
         return;
       }
       try {
@@ -140,14 +150,20 @@ export default function App() {
           for (let i = 0; i < hashView.length; i++) {
             hashHex += hashView[i].toString(16).padStart(2, '0');
           }
-          setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          if (adminAuthSequenceRef.current === currentSequence) {
+            setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          }
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
-          setIsAdminAuth(false);
+          if (adminAuthSequenceRef.current === currentSequence) {
+            setIsAdminAuth(false);
+          }
         }
       } catch (err) {
-        setIsAdminAuth(false);
+        if (adminAuthSequenceRef.current === currentSequence) {
+          setIsAdminAuth(false);
+        }
       }
     }, 300);
   };

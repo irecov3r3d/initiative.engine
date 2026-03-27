@@ -17,3 +17,7 @@
 ## 2026-03-25 - O(1) Lookup Over Inline Array Instantiation
 **Learning:** Using an inline array for membership checks inside a function causes unnecessary per-call array allocation overhead.
 **Action:** Use a module-level Set for O(1) lookup complexity and to eliminate per-call allocation overhead.
+
+## 2026-03-26 - O(n) Array Traversals in Reward Lookups
+**Learning:** Storing static data configurations (like reward tiers in REWARDS) as arrays forces O(n) traversal using `Array.find()` during component state changes, creating unnecessary execution overhead.
+**Action:** Restructure underlying static data configurations into O(1) hash maps (object key lookups) keyed by their identifier to eliminate array iteration overhead.

@@ -22,3 +22,8 @@
 **Vulnerability:** A race condition existed where a user could enter the correct admin password, immediately click "Cancel", and navigate away. The debounced authentication handler would then fire in the background, inadvertently granting unauthorized administrative access to the session.
 **Learning:** In purely client-side applications, pending asynchronous operations (like debounced state updates or timeouts) can resolve after a component has logically "closed" or navigated away, corrupting the new state.
 **Prevention:** Always explicitly clear pending asynchronous operations (such as `clearTimeout(adminTimeoutRef.current)`) alongside clearing sensitive state variables whenever a user cancels or explicitly exits a secure session flow.
+
+## 2026-03-27 - Un-abortable Async Race Condition in Admin Auth
+**Vulnerability:** A race condition allowed un-abortable asynchronous cryptographic operations (e.g., crypto.subtle.digest) to resolve after a user cancelled an administrative login, unintentionally bypassing the security lock and granting unauthorized access.
+**Learning:** Un-abortable async operations in React can resolve out of band. Even if timeouts are cleared, already-started promises will eventually resolve and may execute state updates with stale closure data if not explicitly guarded.
+**Prevention:** Always use a useRef sequence counter that increments on input changes and cancellations. Verify this sequence counter inside the async callback before applying state updates to prevent stale closures from causing security authorization bypasses.

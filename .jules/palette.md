@@ -16,3 +16,7 @@
 ## 2024-11-20 - Dynamic Visual Timers Require Audio Pairing
 **Learning:** For features that guide the user through a time-based visual sequence (e.g., a breathing exercise with expanding/contracting circles and a fast countdown), relying strictly on visuals completely blocks visually impaired users. Standard `aria-label`s on containers do not dynamically announce fast-changing states.
 **Action:** When creating a guided sequence, place `aria-live="assertive"` on the semantic text that describes the current phase (e.g., "Inhale", "Exhale"). Simultaneously, to prevent the screen reader from overwhelmingly spamming the user with rapidly changing numbers, place `aria-hidden="true"` on the literal numerical countdown ticking every second.
+
+## 2024-03-28 - Progressive Helper Text for Strict Inputs with Shortcuts
+**Learning:** Strict form inputs (like single-word limits) and hidden keyboard shortcuts (like pressing Enter to submit) leave users guessing about constraints and interaction patterns.
+**Action:** Use dynamic `aria-live="polite"` helper text bound to the input via `aria-describedby` to progressively explain constraints and reveal shortcuts.

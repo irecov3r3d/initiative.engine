@@ -93,8 +93,10 @@ export default function App() {
 
   const timeoutRef = useRef(null);
   const adminTimeoutRef = useRef(null);
+  const authSequenceRef = useRef(0);
 
   const lockAdmin = () => {
+    authSequenceRef.current += 1;
     clearTimeout(adminTimeoutRef.current);
     setAdminPass("");
     setIsAdminAuth(false);
@@ -115,6 +117,7 @@ export default function App() {
   // from the admin screen without explicitly locking the system, preventing authorization bypass.
   useEffect(() => {
     if (screen !== "admin" && isAdminAuth) {
+      authSequenceRef.current += 1;
       setIsAdminAuth(false);
       setAdminPass("");
     }
@@ -125,16 +128,18 @@ export default function App() {
   const handleAdminPassChange = (e) => {
     const val = e.target.value;
     setAdminPass(val);
+    const currentSeq = ++authSequenceRef.current;
     clearTimeout(adminTimeoutRef.current);
     adminTimeoutRef.current = setTimeout(async () => {
       if (!val) {
-        setIsAdminAuth(false);
+        if (currentSeq === authSequenceRef.current) setIsAdminAuth(false);
         return;
       }
       try {
         if (import.meta.env.VITE_ADMIN_PASS_HASH) {
           const data = SHARED_ENCODER.encode(val);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+          if (currentSeq !== authSequenceRef.current) return;
           const hashView = new Uint8Array(hashBuffer);
           let hashHex = '';
           for (let i = 0; i < hashView.length; i++) {
@@ -144,10 +149,10 @@ export default function App() {
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
-          setIsAdminAuth(false);
+          if (currentSeq === authSequenceRef.current) setIsAdminAuth(false);
         }
       } catch (err) {
-        setIsAdminAuth(false);
+        if (currentSeq === authSequenceRef.current) setIsAdminAuth(false);
       }
     }, 300);
   };

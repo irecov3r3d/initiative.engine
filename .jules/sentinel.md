@@ -22,3 +22,7 @@
 **Vulnerability:** A race condition existed where a user could enter the correct admin password, immediately click "Cancel", and navigate away. The debounced authentication handler would then fire in the background, inadvertently granting unauthorized administrative access to the session.
 **Learning:** In purely client-side applications, pending asynchronous operations (like debounced state updates or timeouts) can resolve after a component has logically "closed" or navigated away, corrupting the new state.
 **Prevention:** Always explicitly clear pending asynchronous operations (such as `clearTimeout(adminTimeoutRef.current)`) alongside clearing sensitive state variables whenever a user cancels or explicitly exits a secure session flow.
+## 2025-03-29 - Race Condition in Un-abortable Crypto Operations
+**Vulnerability:** A race condition allowed stale async closures (like `crypto.subtle.digest`) to bypass authentication checks by resolving and updating state after a user had navigated away or cancelled an action.
+**Learning:** In React, cancelling a timeout (`clearTimeout`) does not abort an async function that has already begun executing and is paused at an `await`.
+**Prevention:** Use a `useRef` sequence counter that increments on state changes or cancellations, and verify this sequence number inside the async callback before applying state updates.

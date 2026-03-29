@@ -357,9 +357,19 @@ export default function App() {
                     completeSession();
                   }
                 }}
+                aria-describedby="moodWordHelp"
                 className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />
+              <p
+                id="moodWordHelp"
+                aria-live="polite"
+                className={`mt-4 text-center text-[10px] tracking-widest uppercase transition-opacity duration-300 ${
+                  moodWord.trim() ? u.color : 'opacity-0 text-slate-500'
+                }`}
+              >
+                {moodWord.trim() ? "Press Enter to complete" : "Enter one word"}
+              </p>
             </div>
 
             <div className="flex gap-4">

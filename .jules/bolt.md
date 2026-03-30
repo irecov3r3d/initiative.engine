@@ -17,3 +17,7 @@
 ## 2026-03-25 - O(1) Lookup Over Inline Array Instantiation
 **Learning:** Using an inline array for membership checks inside a function causes unnecessary per-call array allocation overhead.
 **Action:** Use a module-level Set for O(1) lookup complexity and to eliminate per-call allocation overhead.
+
+## 2026-03-30 - Array.find() to Hash Map Lookup Optimization
+**Learning:** Using Array.find() for static data configuration lookups introduces unnecessary O(n) overhead.
+**Action:** Restructure underlying static data configurations to use object keys (hash maps) for O(1) lookups, eliminating static O(n) array searches during component execution.

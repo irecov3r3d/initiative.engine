@@ -357,9 +357,17 @@ export default function App() {
                     completeSession();
                   }
                 }}
+                aria-describedby="moodWordHelper"
                 className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />
+              <div id="moodWordHelper" aria-live="polite" className="h-4 mt-3 text-center flex items-center justify-center">
+                {moodWord.trim() ? (
+                  <span className="text-[10px] text-slate-500 tracking-widest uppercase animate-in fade-in duration-300">
+                    Press <kbd className="font-sans px-1 py-0.5 rounded bg-slate-800 border border-slate-700">Enter</kbd> to complete
+                  </span>
+                ) : null}
+              </div>
             </div>
 
             <div className="flex gap-4">

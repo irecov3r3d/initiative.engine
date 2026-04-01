@@ -349,6 +349,7 @@ export default function App() {
                 type="text"
                 autoFocus
                 maxLength={20}
+                aria-describedby="moodWordHelper"
                 placeholder="Current state..."
                 value={moodWord}
                 onChange={e => setMoodWord(e.target.value.split(" ")[0])}
@@ -360,6 +361,13 @@ export default function App() {
                 className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />
+              <div
+                id="moodWordHelper"
+                aria-live="polite"
+                className="mt-3 text-center text-[10px] tracking-widest uppercase text-slate-500 transition-opacity duration-300"
+              >
+                {moodWord.trim() ? "Press Enter to complete" : "Single word only"}
+              </div>
             </div>
 
             <div className="flex gap-4">

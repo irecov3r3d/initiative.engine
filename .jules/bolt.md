@@ -17,3 +17,7 @@
 ## 2026-03-25 - O(1) Lookup Over Inline Array Instantiation
 **Learning:** Using an inline array for membership checks inside a function causes unnecessary per-call array allocation overhead.
 **Action:** Use a module-level Set for O(1) lookup complexity and to eliminate per-call allocation overhead.
+
+## 2026-04-01 - Optimizing Hex String Concatenation
+**Learning:** Even within a raw `for` loop, repeatedly calling `toString(16)` and `padStart(2, '0')` on every byte of a `Uint8Array` introduces measurable overhead during cryptographic operations.
+**Action:** Utilize a module-level pre-computed lookup table (`HEX_LOOKUP`) mapping 0-255 to their hex string equivalents to eliminate per-byte method call and object allocation overhead.

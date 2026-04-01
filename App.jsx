@@ -135,11 +135,9 @@ export default function App() {
         if (import.meta.env.VITE_ADMIN_PASS_HASH) {
           const data = SHARED_ENCODER.encode(val);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-          const hashView = new Uint8Array(hashBuffer);
-          let hashHex = '';
-          for (let i = 0; i < hashView.length; i++) {
-            hashHex += hashView[i].toString(16).padStart(2, '0');
-          }
+          const hashHex = Array.from(new Uint8Array(hashBuffer))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
           setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.

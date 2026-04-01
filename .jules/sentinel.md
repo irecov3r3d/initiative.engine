@@ -22,3 +22,8 @@
 **Vulnerability:** A race condition existed where a user could enter the correct admin password, immediately click "Cancel", and navigate away. The debounced authentication handler would then fire in the background, inadvertently granting unauthorized administrative access to the session.
 **Learning:** In purely client-side applications, pending asynchronous operations (like debounced state updates or timeouts) can resolve after a component has logically "closed" or navigated away, corrupting the new state.
 **Prevention:** Always explicitly clear pending asynchronous operations (such as `clearTimeout(adminTimeoutRef.current)`) alongside clearing sensitive state variables whenever a user cancels or explicitly exits a secure session flow.
+
+## 2026-03-31 - Timing Attack Vulnerability in Hash Comparison
+**Vulnerability:** The admin password hash was compared using the standard equality operator (`===`), which is susceptible to timing attacks.
+**Learning:** Standard string comparisons return as soon as a mismatch is found, allowing an attacker to potentially deduce the correct string by measuring the time taken for the comparison.
+**Prevention:** Use a constant-time comparison function that iterates through the entire length of the strings regardless of where a mismatch occurs.

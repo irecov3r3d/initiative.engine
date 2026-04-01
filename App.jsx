@@ -61,6 +61,7 @@ const BreathCountdown = ({ phase, duration, color }) => {
 };
 
 const SHARED_ENCODER = new TextEncoder();
+const HEX_LOOKUP = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0'));
 
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
@@ -136,9 +137,11 @@ export default function App() {
           const data = SHARED_ENCODER.encode(val);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
           const hashView = new Uint8Array(hashBuffer);
+          // Performance: Using a pre-computed lookup table for hex conversion to avoid
+          // per-byte string operations and reduce allocation overhead.
           let hashHex = '';
           for (let i = 0; i < hashView.length; i++) {
-            hashHex += hashView[i].toString(16).padStart(2, '0');
+            hashHex += HEX_LOOKUP[hashView[i]];
           }
           setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
         } else {

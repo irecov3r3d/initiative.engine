@@ -17,3 +17,7 @@
 ## 2026-03-25 - O(1) Lookup Over Inline Array Instantiation
 **Learning:** Using an inline array for membership checks inside a function causes unnecessary per-call array allocation overhead.
 **Action:** Use a module-level Set for O(1) lookup complexity and to eliminate per-call allocation overhead.
+
+## 2026-03-28 - Hex String Conversion via Lookup Table
+**Learning:** Repeatedly calling `toString(16).padStart(2, '0')` in a loop for hex conversion adds unnecessary CPU overhead and minor allocations. A pre-computed lookup table for all 256 byte values is significantly faster.
+**Action:** Use a module-level lookup table (`HEX_LOOKUP`) for converting byte arrays to hex strings.

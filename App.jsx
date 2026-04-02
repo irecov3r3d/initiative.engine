@@ -350,6 +350,7 @@ export default function App() {
                 autoFocus
                 maxLength={20}
                 placeholder="Current state..."
+                aria-describedby="moodWordHelp"
                 value={moodWord}
                 onChange={e => setMoodWord(e.target.value.split(" ")[0])}
                 onKeyDown={e => {
@@ -360,6 +361,9 @@ export default function App() {
                 className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />
+              <div id="moodWordHelp" aria-live="polite" className={`h-4 mt-2 text-[10px] text-center transition-opacity duration-300 ${moodWord.trim() ? 'opacity-100 text-slate-400' : 'opacity-0'}`}>
+                Press <kbd className="font-sans px-1 py-0.5 rounded-md bg-slate-800 border border-slate-700 mx-0.5">Enter</kbd> to complete
+              </div>
             </div>
 
             <div className="flex gap-4">

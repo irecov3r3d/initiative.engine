@@ -22,3 +22,13 @@
 **Vulnerability:** A race condition existed where a user could enter the correct admin password, immediately click "Cancel", and navigate away. The debounced authentication handler would then fire in the background, inadvertently granting unauthorized administrative access to the session.
 **Learning:** In purely client-side applications, pending asynchronous operations (like debounced state updates or timeouts) can resolve after a component has logically "closed" or navigated away, corrupting the new state.
 **Prevention:** Always explicitly clear pending asynchronous operations (such as `clearTimeout(adminTimeoutRef.current)`) alongside clearing sensitive state variables whenever a user cancels or explicitly exits a secure session flow.
+
+## 2026-04-02 - Un-abortable Async Operation Race Condition
+**Vulnerability:** Debounced authentication used `crypto.subtle.digest`, which is un-abortable. If a user navigated away while the promise was resolving, the subsequent `setIsAdminAuth(true)` state update would still execute, bypassing the earlier cleanup and granting unauthorized access.
+**Learning:** `clearTimeout` only cancels pending timeouts, not executing asynchronous operations. Un-abortable promises will continue to resolve and can apply stale state updates to the component if not explicitly guarded.
+**Prevention:** Implement a `useRef` sequence counter that increments on state changes or cancellations. Verify this sequence number inside the async callback before applying state updates to ensure stale closures do not bypass logic.
+
+## 2026-04-02 - Timing-Based Side-Channel Vulnerability in Auth
+**Vulnerability:** The hash comparison for the admin password used standard string equality, which exits early upon the first character mismatch, potentially leaking the correct hash timing.
+**Learning:** Even for client-side comparisons of publicly exposed hashes, using constant-time equality protects against side-channel inference where timing variations could allow iterative guessing.
+**Prevention:** Utilize bitwise XOR and OR operations in a dedicated `timingSafeEqual` utility to ensure comparisons always iterate through the full string length.

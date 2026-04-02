@@ -17,3 +17,7 @@
 ## 2026-03-25 - O(1) Lookup Over Inline Array Instantiation
 **Learning:** Using an inline array for membership checks inside a function causes unnecessary per-call array allocation overhead.
 **Action:** Use a module-level Set for O(1) lookup complexity and to eliminate per-call allocation overhead.
+
+## 2026-04-02 - Pre-computed Lookup Table for ArrayBuffer Conversion
+**Learning:** Repeated .toString(16) and .padStart() calls inside a loop for ArrayBuffer to hex string conversion adds significant string formatting overhead.
+**Action:** Utilize a module-level pre-computed lookup table (e.g., HEX_LOOKUP) inside a raw for loop to eliminate the overhead of string operations.

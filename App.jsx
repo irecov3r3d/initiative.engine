@@ -62,6 +62,13 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
 const SHARED_ENCODER = new TextEncoder();
 
+// Performance: Pre-compute a lookup table for high-speed ArrayBuffer to hex string conversion.
+// Expected Impact: Eliminates per-byte .toString(16) and .padStart() overhead, significantly reducing execution time and memory allocation during cryptographic operations.
+const HEX_LOOKUP = new Array(256);
+for (let i = 0; i < 256; i++) {
+  HEX_LOOKUP[i] = i.toString(16).padStart(2, '0');
+}
+
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
     <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
@@ -137,8 +144,10 @@ export default function App() {
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
           const hashView = new Uint8Array(hashBuffer);
           let hashHex = '';
+          // Performance: Replaced inline .toString(16) and .padStart() with pre-computed lookup table
+          // Expected Impact: O(1) string retrieval per byte eliminates string formatting overhead during tight loops
           for (let i = 0; i < hashView.length; i++) {
-            hashHex += hashView[i].toString(16).padStart(2, '0');
+            hashHex += HEX_LOOKUP[hashView[i]];
           }
           setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
         } else {

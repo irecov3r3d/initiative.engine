@@ -22,3 +22,12 @@
 **Vulnerability:** A race condition existed where a user could enter the correct admin password, immediately click "Cancel", and navigate away. The debounced authentication handler would then fire in the background, inadvertently granting unauthorized administrative access to the session.
 **Learning:** In purely client-side applications, pending asynchronous operations (like debounced state updates or timeouts) can resolve after a component has logically "closed" or navigated away, corrupting the new state.
 **Prevention:** Always explicitly clear pending asynchronous operations (such as `clearTimeout(adminTimeoutRef.current)`) alongside clearing sensitive state variables whenever a user cancels or explicitly exits a secure session flow.
+## 2025-10-25 - Timing-Based Side-Channel Attack on Hash Comparison
+**Vulnerability:** Using standard equality (`===`) for hash comparisons in the frontend allowed for potential timing attacks, as the comparison bails out early on the first mismatched character.
+**Learning:** While the target hash may be in the bundle, defense-in-depth requires protecting all authentication checks from timing side-channels, as an attacker could theoretically guess the hash character-by-character based on response time.
+**Prevention:** Implement and utilize a `timingSafeEqual` utility that performs constant-time comparison using bitwise operations (`^` and `|`) for all sensitive string and hash comparisons.
+
+## 2025-10-25 - Race Condition from Un-abortable Asynchronous Operations
+**Vulnerability:** Asynchronous crypto operations (`crypto.subtle.digest`) in React state updates could not be easily aborted, meaning a state change or navigation during the promise execution could lead to unauthorized state changes when the promise resolved.
+**Learning:** Even if timeouts are cleared, pending native Promises (like Web Crypto API) continue executing. If they resolve and update React state based on stale closure context, they can bypass security boundaries.
+**Prevention:** Use a mutable `useRef` sequence counter that increments on input changes or navigation events. Verify this sequence number immediately before applying any state updates inside asynchronous callbacks to ensure the context is still valid.

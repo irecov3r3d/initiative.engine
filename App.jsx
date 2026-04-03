@@ -62,6 +62,17 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
 const SHARED_ENCODER = new TextEncoder();
 
+// Security: Constant-time string comparison to mitigate timing-based side-channel attacks
+const timingSafeEqual = (a, b) => {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+};
+
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
     <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
@@ -93,8 +104,10 @@ export default function App() {
 
   const timeoutRef = useRef(null);
   const adminTimeoutRef = useRef(null);
+  const authSequenceRef = useRef(0);
 
   const lockAdmin = () => {
+    authSequenceRef.current += 1;
     clearTimeout(adminTimeoutRef.current);
     setAdminPass("");
     setIsAdminAuth(false);
@@ -114,40 +127,51 @@ export default function App() {
   // Security: Automatically clear sensitive authentication state if the user navigates away
   // from the admin screen without explicitly locking the system, preventing authorization bypass.
   useEffect(() => {
-    if (screen !== "admin" && isAdminAuth) {
+    if (screen !== "admin") {
+      authSequenceRef.current += 1;
+      clearTimeout(adminTimeoutRef.current);
       setIsAdminAuth(false);
       setAdminPass("");
     }
-  }, [screen, isAdminAuth]);
+  }, [screen]);
 
   // Security: Hash password to avoid storing plaintext in client bundle
   // Performance: Debounce expensive hashing operation to avoid main thread blocking
   const handleAdminPassChange = (e) => {
     const val = e.target.value;
     setAdminPass(val);
+    authSequenceRef.current += 1;
+    const currentSeq = authSequenceRef.current;
+
     clearTimeout(adminTimeoutRef.current);
     adminTimeoutRef.current = setTimeout(async () => {
       if (!val) {
-        setIsAdminAuth(false);
+        if (authSequenceRef.current === currentSeq) setIsAdminAuth(false);
         return;
       }
       try {
         if (import.meta.env.VITE_ADMIN_PASS_HASH) {
           const data = SHARED_ENCODER.encode(val);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+          if (authSequenceRef.current !== currentSeq) return;
+
           const hashView = new Uint8Array(hashBuffer);
           let hashHex = '';
           for (let i = 0; i < hashView.length; i++) {
             hashHex += hashView[i].toString(16).padStart(2, '0');
           }
-          setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          if (authSequenceRef.current !== currentSeq) return;
+
+          if (authSequenceRef.current === currentSeq) {
+            setIsAdminAuth(timingSafeEqual(hashHex, import.meta.env.VITE_ADMIN_PASS_HASH));
+          }
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
-          setIsAdminAuth(false);
+          if (authSequenceRef.current === currentSeq) setIsAdminAuth(false);
         }
       } catch (err) {
-        setIsAdminAuth(false);
+        if (authSequenceRef.current === currentSeq) setIsAdminAuth(false);
       }
     }, 300);
   };

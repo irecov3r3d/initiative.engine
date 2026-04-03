@@ -17,3 +17,7 @@
 ## 2026-03-25 - O(1) Lookup Over Inline Array Instantiation
 **Learning:** Using an inline array for membership checks inside a function causes unnecessary per-call array allocation overhead.
 **Action:** Use a module-level Set for O(1) lookup complexity and to eliminate per-call allocation overhead.
+
+## 2024-05-18 - Pre-computed Hex Lookup Table
+**Learning:** Repeatedly calling `toString(16)` and `padStart` inside a raw loop for ArrayBuffer conversion still introduces measurable string allocation overhead.
+**Action:** Use a pre-computed module-level lookup table (`HEX_LOOKUP`) to achieve O(1) string retrieval per byte.

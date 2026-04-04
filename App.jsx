@@ -100,9 +100,11 @@ export default function App() {
 
   const timeoutRef = useRef(null);
   const adminTimeoutRef = useRef(null);
+  const authSequenceRef = useRef(0);
 
   const lockAdmin = () => {
     clearTimeout(adminTimeoutRef.current);
+    authSequenceRef.current += 1;
     setAdminPass("");
     setIsAdminAuth(false);
     setScreen("home");
@@ -120,12 +122,15 @@ export default function App() {
 
   // Security: Automatically clear sensitive authentication state if the user navigates away
   // from the admin screen without explicitly locking the system, preventing authorization bypass.
+  // Security: Unconditionally clean up pending operations to prevent race conditions.
   useEffect(() => {
-    if (screen !== "admin" && isAdminAuth) {
+    if (screen !== "admin") {
+      clearTimeout(adminTimeoutRef.current);
+      authSequenceRef.current += 1;
       setIsAdminAuth(false);
       setAdminPass("");
     }
-  }, [screen, isAdminAuth]);
+  }, [screen]);
 
   // Security: Hash password to avoid storing plaintext in client bundle
   // Performance: Debounce expensive hashing operation to avoid main thread blocking
@@ -133,28 +138,35 @@ export default function App() {
     const val = e.target.value;
     setAdminPass(val);
     clearTimeout(adminTimeoutRef.current);
+    const currentSeq = ++authSequenceRef.current;
+
     adminTimeoutRef.current = setTimeout(async () => {
       if (!val) {
-        setIsAdminAuth(false);
+        if (authSequenceRef.current === currentSeq) setIsAdminAuth(false);
         return;
       }
       try {
         if (import.meta.env.VITE_ADMIN_PASS_HASH) {
           const data = SHARED_ENCODER.encode(val);
           const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+          // Security: Prevent state updates if component has unmounted or user cancelled
+          if (authSequenceRef.current !== currentSeq) return;
+
           const hashView = new Uint8Array(hashBuffer);
           let hashHex = '';
           for (let i = 0; i < hashView.length; i++) {
             hashHex += HEX_LOOKUP[hashView[i]];
           }
+
           setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
-          setIsAdminAuth(false);
+          if (authSequenceRef.current === currentSeq) setIsAdminAuth(false);
         }
       } catch (err) {
-        setIsAdminAuth(false);
+        if (authSequenceRef.current === currentSeq) setIsAdminAuth(false);
       }
     }, 300);
   };

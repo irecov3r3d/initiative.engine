@@ -17,3 +17,7 @@
 ## 2026-03-25 - O(1) Lookup Over Inline Array Instantiation
 **Learning:** Using an inline array for membership checks inside a function causes unnecessary per-call array allocation overhead.
 **Action:** Use a module-level Set for O(1) lookup complexity and to eliminate per-call allocation overhead.
+
+## 2026-03-30 - O(1) Hash Map Over O(N) Array Lookup
+**Learning:** Using `Array.find()` to search through a static array during a React component's execution path causes unnecessary O(n) iteration overhead, even for relatively small sets, compared to an O(1) lookup.
+**Action:** Restructure static configurations like `REWARDS` from arrays to objects keyed by the lookup value (e.g., `tier`) to allow instantaneous bracket notation access.

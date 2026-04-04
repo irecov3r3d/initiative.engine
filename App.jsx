@@ -62,6 +62,13 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
 const SHARED_ENCODER = new TextEncoder();
 
+// Performance: Pre-computed hex lookup table for 0-255 to optimize ArrayBuffer to hex string conversion.
+// Expected Impact: Eliminates the overhead of repeated toString(16) and padStart(2, '0') calls during the hashing process, reducing memory allocation and improving execution speed.
+const HEX_LOOKUP = [];
+for (let i = 0; i < 256; i++) {
+  HEX_LOOKUP[i] = i.toString(16).padStart(2, '0');
+}
+
 const BackgroundGradients = React.memo(() => (
   <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
     <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen transform-gpu will-change-transform" />
@@ -138,7 +145,7 @@ export default function App() {
           const hashView = new Uint8Array(hashBuffer);
           let hashHex = '';
           for (let i = 0; i < hashView.length; i++) {
-            hashHex += hashView[i].toString(16).padStart(2, '0');
+            hashHex += HEX_LOOKUP[hashView[i]];
           }
           setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
         } else {

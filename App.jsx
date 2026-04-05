@@ -388,6 +388,7 @@ export default function App() {
             <div className="flex gap-4">
               <button
                 onClick={() => setScreen("home")}
+                title="Return to the dashboard"
                 className="flex-1 py-4 rounded-xl border border-slate-700 text-slate-400 text-xs tracking-widest uppercase hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               >
                 Back
@@ -464,6 +465,7 @@ export default function App() {
 
         <button
           onClick={() => { setScreen("home"); setActiveUser(null); setEarnedReward(null); }}
+          title="Return to the dashboard to select another user"
           className="w-full py-4 mt-8 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-xs tracking-widest uppercase hover:bg-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
         >
           Return to Dashboard
@@ -498,7 +500,7 @@ export default function App() {
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">
-              <button onClick={lockAdmin} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
+              <button onClick={lockAdmin} title="Cancel system override and return to home" className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>
         ) : (
@@ -521,7 +523,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <button onClick={lockAdmin} className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Lock System</button>
+            <button onClick={lockAdmin} title="Lock the system and return to home" className="w-full py-3 bg-slate-200 text-slate-900 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Lock System</button>
           </div>
         )}
       </div>

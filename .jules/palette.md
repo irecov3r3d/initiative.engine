@@ -20,3 +20,7 @@
 ## 2026-04-04 - Dynamic Helper Text for Hidden Keyboard Shortcuts
 **Learning:** Strict form inputs that restrict input (e.g., to a single word) and have hidden keyboard shortcuts (like pressing 'Enter' to submit) can confuse users who aren't aware of the constraints or shortcuts.
 **Action:** Use dynamic `aria-live="polite"` helper text bound to the input via `aria-describedby` to progressively explain constraints and reveal shortcuts based on the input state.
+
+## 2026-04-06 - Progressive Disclosure of Keyboard Shortcuts
+**Learning:** For strict auto-focused form inputs without visible submit/cancel buttons, omitting keyboard shortcut instructions traps keyboard users. Progressively revealing these constraints via `aria-live="polite"` bound to the input via `aria-describedby` ensures screen reader and keyboard users are explicitly guided.
+**Action:** Always bind the Escape key to cancel/back actions on focused overlays and announce it using dynamic `aria-describedby` helper text.

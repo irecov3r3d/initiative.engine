@@ -26,3 +26,7 @@
 **Vulnerability:** A race condition existed where cancelling out of the admin panel before the `crypto.subtle.digest` resolved allowed stale closures to update the `isAdminAuth` state, bypassing authorization. Additionally, the fallback hash comparison used a non-constant time comparison (`===`).
 **Learning:** In client-side React applications, pending asynchronous operations that cannot be natively aborted (like `crypto.subtle.digest`) can resolve maliciously while the authentication state is false. Additionally, standard string comparisons for hashes can leak timing information.
 **Prevention:** Use a `useRef` sequence counter that increments on state changes or cancellations. Verify this sequence number inside the async callback before applying state updates. Additionally, explicitly clear timeouts unconditionally upon navigating away, and use constant-time comparison utilities (e.g., `timingSafeEqual`) for sensitive hashes.
+## 2026-04-06 - Clear Plaintext Password After Authentication
+**Vulnerability:** The plaintext admin password remained in the component's state memory even after successful cryptographic validation.
+**Learning:** Retaining sensitive credentials in client-side state longer than strictly necessary increases the window of exposure.
+**Prevention:** Explicitly clear sensitive credentials from state (e.g., `setAdminPass("")`) immediately after they have been successfully validated.

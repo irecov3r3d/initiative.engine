@@ -373,6 +373,9 @@ export default function App() {
                 aria-describedby="moodWordHelp"
                 onChange={e => setMoodWord(e.target.value.split(" ")[0])}
                 onKeyDown={e => {
+                  if (e.key === 'Escape') {
+                    setScreen("home");
+                  }
                   if (e.key === 'Enter' && moodWord.trim()) {
                     completeSession();
                   }
@@ -381,7 +384,7 @@ export default function App() {
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />
               <div id="moodWordHelp" aria-live="polite" className="mt-3 text-center text-[10px] text-slate-500 tracking-wider">
-                {moodWord.trim() ? "Press Enter to complete" : "Enter a single word to continue"}
+                {moodWord.trim() ? "Press Enter to complete • Esc to cancel" : "Enter a single word • Esc to cancel"}
               </div>
             </div>
 
@@ -495,8 +498,13 @@ export default function App() {
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
               onChange={handleAdminPassChange}
+              onKeyDown={(e) => e.key === 'Escape' && lockAdmin()}
+              aria-describedby="adminHelp"
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
+            <div id="adminHelp" aria-live="polite" className="mb-4 text-center text-[10px] text-slate-500 tracking-wider">
+              {adminPass.length > 0 ? "Code must be exact • Esc to cancel" : "Enter code • Esc to cancel"}
+            </div>
             <div className="flex gap-2">
               <button onClick={lockAdmin} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>

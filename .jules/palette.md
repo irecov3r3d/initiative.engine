@@ -20,3 +20,7 @@
 ## 2026-04-04 - Dynamic Helper Text for Hidden Keyboard Shortcuts
 **Learning:** Strict form inputs that restrict input (e.g., to a single word) and have hidden keyboard shortcuts (like pressing 'Enter' to submit) can confuse users who aren't aware of the constraints or shortcuts.
 **Action:** Use dynamic `aria-live="polite"` helper text bound to the input via `aria-describedby` to progressively explain constraints and reveal shortcuts based on the input state.
+
+## 2024-04-07 - Escape Key for Modals/Admin Screens
+**Learning:** When a user is in a focused, isolated screen like an Admin override with a single input, they expect standard modal behaviors, including pressing 'Escape' to cancel or close. Relying only on a visible 'Cancel' button breaks keyboard flow.
+**Action:** Always bind the 'Escape' key to the cancel/close action for isolated screens and provide a visual hint for the shortcut.

@@ -495,9 +495,16 @@ export default function App() {
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
               onChange={handleAdminPassChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') lockAdmin();
+              }}
+              aria-describedby="adminPassHelp"
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
-            <div className="flex gap-2">
+            <div id="adminPassHelp" aria-live="polite" className="text-center text-[10px] text-slate-500 tracking-wider">
+              Press Esc to cancel
+            </div>
+            <div className="flex gap-2 mt-2">
               <button onClick={lockAdmin} className="flex-1 py-3 border border-slate-700 rounded-xl text-xs uppercase tracking-widest text-slate-400 hover:bg-slate-800 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">Cancel</button>
             </div>
           </div>

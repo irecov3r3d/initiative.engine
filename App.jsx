@@ -62,6 +62,17 @@ const BreathCountdown = ({ phase, duration, color }) => {
 
 const SHARED_ENCODER = new TextEncoder();
 
+// Security: Constant-time string comparison to prevent timing attacks on hash validation.
+const timingSafeEqual = (a, b) => {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+};
+
 // Performance: Pre-computed hex lookup table for 0-255 to optimize ArrayBuffer to hex string conversion.
 // Expected Impact: Eliminates the overhead of repeated toString(16) and padStart(2, '0') calls during the hashing process, reducing memory allocation and improving execution speed.
 const HEX_LOOKUP = [];
@@ -159,7 +170,7 @@ export default function App() {
             hashHex += HEX_LOOKUP[hashView[i]];
           }
 
-          setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          setIsAdminAuth(timingSafeEqual(hashHex, import.meta.env.VITE_ADMIN_PASS_HASH));
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.

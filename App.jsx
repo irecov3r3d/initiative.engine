@@ -17,14 +17,14 @@ const SMILE_PIECES = [
 ];
 
 const REWARDS = {
-  cade: [
-    { tier: 7, title: "Ragnarok — The Base Spot", content: "Ice cave system (11 lat / 22 lon) is highly defensible. Bring a Yuty." },
-    { tier: 14, title: "The Center — Underwater Loot", content: "Underwater caves near floating island drop blueprint-tier loot. Bring scuba." }
-  ],
-  morgan: [
-    { tier: 7, title: "The Template Hack", content: "Search 'Cornell Notes' in Notion. Explain concepts out loud like teaching a 10-year-old." },
-    { tier: 14, title: "The Grocery Hack", content: "Buy store brand except for 3-5 core items. Shop the perimeter first." }
-  ]
+  cade: {
+    7: { tier: 7, title: "Ragnarok — The Base Spot", content: "Ice cave system (11 lat / 22 lon) is highly defensible. Bring a Yuty." },
+    14: { tier: 14, title: "The Center — Underwater Loot", content: "Underwater caves near floating island drop blueprint-tier loot. Bring scuba." }
+  },
+  morgan: {
+    7: { tier: 7, title: "The Template Hack", content: "Search 'Cornell Notes' in Notion. Explain concepts out loud like teaching a 10-year-old." },
+    14: { tier: 14, title: "The Grocery Hack", content: "Buy store brand except for 3-5 core items. Shop the perimeter first." }
+  }
 };
 
 const USERS = {
@@ -222,9 +222,11 @@ export default function App() {
     const isMilestone = MILESTONE_TIERS.has(newCouple);
 
     if (bothDone && isMilestone) {
+      // Performance: Replaced O(n) Array.find() with O(1) hash map lookup for REWARDS
+      // Impact: Eliminates array iteration during component render for static config lookups
       rewardObj = {
-        cade: REWARDS.cade.find(r => r.tier === newCouple),
-        morgan: REWARDS.morgan.find(r => r.tier === newCouple),
+        cade: REWARDS.cade[newCouple],
+        morgan: REWARDS.morgan[newCouple],
         smile: SMILE_PIECES[Math.floor(Math.random() * SMILE_PIECES.length)]
       };
     }

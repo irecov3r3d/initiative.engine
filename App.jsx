@@ -375,13 +375,15 @@ export default function App() {
                 onKeyDown={e => {
                   if (e.key === 'Enter' && moodWord.trim()) {
                     completeSession();
+                  } else if (e.key === 'Escape') {
+                    setScreen("home");
                   }
                 }}
                 className={`w-full bg-slate-900/50 border rounded-xl p-4 text-center text-slate-200 focus:outline-none transition-colors
                   ${moodWord ? u.border : 'border-slate-700'} text-lg tracking-wider focus-visible:ring-2 focus-visible:ring-slate-500`}
               />
               <div id="moodWordHelp" aria-live="polite" className="mt-3 text-center text-[10px] text-slate-500 tracking-wider">
-                {moodWord.trim() ? "Press Enter to complete" : "Enter a single word to continue"}
+                {moodWord.trim() ? "Press Enter to complete (or Esc to cancel)" : "Enter a single word to continue (or Esc to cancel)"}
               </div>
             </div>
 
@@ -495,6 +497,11 @@ export default function App() {
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
               onChange={handleAdminPassChange}
+              onKeyDown={e => {
+                if (e.key === 'Escape') {
+                  lockAdmin();
+                }
+              }}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">

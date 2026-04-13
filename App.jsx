@@ -373,7 +373,9 @@ export default function App() {
                 aria-describedby="moodWordHelp"
                 onChange={e => setMoodWord(e.target.value.split(" ")[0])}
                 onKeyDown={e => {
-                  if (e.key === 'Enter' && moodWord.trim()) {
+                  if (e.key === 'Escape') {
+                    setScreen("home");
+                  } else if (e.key === 'Enter' && moodWord.trim()) {
                     completeSession();
                   }
                 }}
@@ -495,6 +497,9 @@ export default function App() {
               /* Security: Limit input length to prevent potential DoS from extremely long strings */
               maxLength={64}
               onChange={handleAdminPassChange}
+              onKeyDown={e => {
+                if (e.key === 'Escape') lockAdmin();
+              }}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-center text-slate-200 focus:border-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
             />
             <div className="flex gap-2">

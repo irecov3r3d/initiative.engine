@@ -20,3 +20,7 @@
 ## 2026-04-04 - Dynamic Helper Text for Hidden Keyboard Shortcuts
 **Learning:** Strict form inputs that restrict input (e.g., to a single word) and have hidden keyboard shortcuts (like pressing 'Enter' to submit) can confuse users who aren't aware of the constraints or shortcuts.
 **Action:** Use dynamic `aria-live="polite"` helper text bound to the input via `aria-describedby` to progressively explain constraints and reveal shortcuts based on the input state.
+
+## 2024-05-20 - Escape Key Cancellation for Auto-Focused Inputs
+**Learning:** For single auto-focused inputs (e.g., check-in prompts or system overrides), relying entirely on tab navigation or mouse clicks to cancel or exit the screen traps keyboard users and slows down power users.
+**Action:** Always implement 'Escape' key handling via an `onKeyDown` listener on auto-focused inputs to allow users to easily cancel or return to the previous screen without leaving the input context.

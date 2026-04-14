@@ -159,7 +159,12 @@ export default function App() {
             hashHex += HEX_LOOKUP[hashView[i]];
           }
 
-          setIsAdminAuth(hashHex === import.meta.env.VITE_ADMIN_PASS_HASH);
+          const isAuthenticated = hashHex === import.meta.env.VITE_ADMIN_PASS_HASH;
+          setIsAdminAuth(isAuthenticated);
+
+          if (isAuthenticated) {
+            setAdminPass("");
+          }
         } else {
           // Security: Fail securely if VITE_ADMIN_PASS_HASH is missing.
           // Do not fallback to VITE_ADMIN_PASS, as referencing it exposes the plaintext secret in the client bundle.
